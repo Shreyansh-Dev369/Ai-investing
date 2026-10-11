@@ -1,26 +1,79 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
+@layer base {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --bg-base: #08090D;
+    --bg-surface: #0E1118;
+    --bg-surface-elevated: #151924;
+    --bg-surface-hover: #1C2232;
+    --border-subtle: #1E2333;
+    --border-strong: #2D354D;
+    --text-primary: #F3F4F6;
+    --text-secondary: #94A3B8;
+    --text-muted: #64748B;
+    --accent-primary: #10B981;
+    --accent-teal: #06B6D4;
+    --accent-blue: #3B82F6;
+    --positive: #10B981;
+    --negative: #F43F5E;
+    --warning: #F59E0B;
+  }
+
+  .light {
+    --bg-base: #F8FAFC;
+    --bg-surface: #FFFFFF;
+    --bg-surface-elevated: #F1F5F9;
+    --bg-surface-hover: #E2E8F0;
+    --border-subtle: #E2E8F0;
+    --border-strong: #CBD5E1;
+    --text-primary: #0F172A;
+    --text-secondary: #475569;
+    --text-muted: #64748B;
+    --accent-primary: #059669;
+    --accent-teal: #0891B2;
+    --accent-blue: #2563EB;
+    --positive: #059669;
+    --negative: #E11D48;
+    --warning: #D97706;
   }
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--bg-base);
+  color: var(--text-primary);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh;
+}
+
+/* Tabular numbers for financial precision */
+.num-tabular {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+/* Custom refined scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+/* Selection */
+::selection {
+  background-color: #06B6D4;
+  color: #08090D;
 }
