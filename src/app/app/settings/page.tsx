@@ -4,11 +4,17 @@ import React, { useState } from "react";
 import {
   Lock,
   Download,
+  ShieldCheck,
+  CheckCircle2,
+  AlertTriangle,
+  ExternalLink,
 } from "lucide-react";
 import { useWorkspace } from "@/context/WorkspaceContext";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
+import { BROKER_REGISTRY } from "@/lib/brokerRegistry";
+import { OrderModal } from "@/components/trading/OrderModal";
 
 export default function SettingsAndFeedsPage() {
   const { isDemoMode, setIsDemoMode, portfolio, theses } = useWorkspace();
@@ -16,6 +22,8 @@ export default function SettingsAndFeedsPage() {
   const [activeTab, setActiveTab] = useState<"providers" | "brokers" | "alerts" | "audit">("providers");
   const [apiKeyInput, setApiKeyInput] = useState("");
   const [isSaved, setIsSaved] = useState(false);
+  const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
+  const [revokedMessage, setRevokedMessage] = useState<string | null>(null);
 
   const handleSaveApiKey = (e: React.FormEvent) => {
     e.preventDefault();
@@ -233,59 +241,155 @@ export default function SettingsAndFeedsPage() {
       {/* Tab 2: Broker Connections */}
       {activeTab === "brokers" && (
         <div className="space-y-6">
-          {/* Security Guarantee Box */}
-          <div className="p-5 border border-emerald-500/30 bg-emerald-500/5 text-xs space-y-2">
-            <div className="flex items-center gap-2 font-mono font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider">
-              <Lock className="h-4 w-4" />
-              <span>Architectural Security Guarantee & Credential Isolation</span>
+          {/* Security Guarantee Box & Emergency Revocation */}
+          <div className="p-5 border border-emerald-500/30 bg-emerald-500/5 text-xs space-y-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div className="flex items-center gap-2 font-mono font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider">
+                <Lock className="h-4 w-4" />
+                <span>Zero-Trust Credential Isolation & Sandbox Architecture</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setRevokedMessage("All active broker session tokens invalidated. Client workspace reverted to paper sandbox isolation.");
+                  setTimeout(() => setRevokedMessage(null), 4000);
+                }}
+                className="px-2.5 py-1 text-[11px] font-mono font-medium rounded border border-rose-500/40 text-rose-600 hover:bg-rose-500/10 transition-colors cursor-pointer self-start sm:self-auto"
+              >
+                Emergency: Revoke All Sessions
+              </button>
             </div>
             <p className="text-[var(--text-secondary)] leading-relaxed">
-              Broker integrations require opt-in OAuth 2.0 authorization with biometric token exchange. Client-side code never stores or transmits raw trading passwords or broker secret keys. Position synchronization is segregated as strictly <strong>Read-Only</strong> unless separate physical hardware execution authorization is provided.
+              Broker integrations operate under isolated OAuth 2.0 and API token exchange. Client-side code never captures, transmits, or stores plain-text trading passwords. Position synchronization is strictly <strong>Read-Only</strong> by default. Order routing requires explicit, two-factor user authorization on each individual ticket.
             </p>
+            {revokedMessage && (
+              <div className="p-2.5 rounded bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-300 text-xs font-mono">
+                {revokedMessage}
+              </div>
+            )}
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-xs">
-            {/* Interactive Brokers */}
-            <div className="p-5 border border-[var(--hairline)] bg-[var(--bg-surface)] space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="font-bold text-[var(--text-primary)]">Interactive Brokers (IBKR)</span>
-                <Badge variant="outline" size="xs">DISCONNECTED</Badge>
-              </div>
-              <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
-                Client Portal API Gateway with institutional multi-currency custody.
+          {/* Action Row */}
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <h3 className="font-serif text-lg font-normal text-[var(--text-primary)]">
+                Broker Capability Registry
+              </h3>
+              <p className="text-xs text-[var(--text-secondary)] mt-0.5">
+                Multi-jurisdiction execution gateways with verified API entitlements and paper sandboxes
               </p>
-              <Button variant="outline" size="sm" className="w-full text-xs font-mono">
-                Authorize IBKR OAuth →
-              </Button>
             </div>
+            <Button
+              variant="cobalt"
+              size="sm"
+              onClick={() => setIsOrderModalOpen(true)}
+              className="text-xs font-mono gap-1.5 text-white shadow-sm"
+            >
+              <ShieldCheck className="w-3.5 h-3.5" />
+              <span>Launch Test Order Ticket (Sandbox)</span>
+            </Button>
+          </div>
 
-            {/* Alpaca */}
-            <div className="p-5 border border-emerald-500/30 bg-[var(--bg-surface)] space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="font-bold text-[var(--text-primary)]">Alpaca Markets</span>
-                <Badge variant="positive" size="xs">PAPER SANDBOX</Badge>
-              </div>
-              <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
-                Paper trading execution environment for quantitative algorithmic testing.
-              </p>
-              <Button variant="outline" size="sm" className="w-full text-xs font-mono">
-                Manage Sandbox →
-              </Button>
-            </div>
+          {/* Broker Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 text-xs">
+            {BROKER_REGISTRY.map((broker) => (
+              <div
+                key={broker.id}
+                className="p-5 border border-[var(--hairline)] bg-[var(--bg-surface)] rounded-md space-y-4 hover:border-stone-400 dark:hover:border-stone-600 transition-colors"
+              >
+                {/* Header */}
+                <div className="flex items-start justify-between">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-sm text-[var(--text-primary)]">
+                        {broker.name}
+                      </span>
+                      <span className="font-mono text-[10px] px-1.5 py-0.5 rounded bg-[var(--bg-surface-elevated)] text-[var(--text-muted)] border border-[var(--hairline)]">
+                        {broker.capabilities.authType}
+                      </span>
+                    </div>
+                    <div className="text-[11px] font-mono text-[var(--text-muted)] mt-1">
+                      {broker.supportedRegions.join(", ")} • {broker.currencies.join(", ")}
+                    </div>
+                  </div>
 
-            {/* Charles Schwab */}
-            <div className="p-5 border border-[var(--hairline)] bg-[var(--bg-surface)] space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="font-bold text-[var(--text-primary)]">Charles Schwab API</span>
-                <Badge variant="outline" size="xs">DISCONNECTED</Badge>
+                  <span
+                    className={`px-2 py-0.5 text-[10px] font-mono font-bold rounded border ${
+                      broker.status === "CONNECTED"
+                        ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30"
+                        : broker.status === "SANDBOX_READY"
+                        ? "bg-cobalt/10 text-cobalt border-cobalt/30"
+                        : "bg-stone-500/10 text-stone-500 border-stone-500/20"
+                    }`}
+                  >
+                    {broker.status.replace("_", " ")}
+                  </span>
+                </div>
+
+                {/* Capability Matrix Badges */}
+                <div className="space-y-1.5 pt-1 border-t border-[var(--hairline)]">
+                  <div className="text-[10px] font-mono uppercase tracking-wider text-[var(--text-muted)]">
+                    Verified Capabilities
+                  </div>
+                  <div className="grid grid-cols-2 gap-1.5 text-[11px] font-mono">
+                    <span className="flex items-center gap-1.5 text-[var(--text-secondary)]">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
+                      Live Quotes
+                    </span>
+                    <span className="flex items-center gap-1.5 text-[var(--text-secondary)]">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
+                      Holdings Sync
+                    </span>
+                    <span className="flex items-center gap-1.5 text-[var(--text-secondary)]">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
+                      Order Preview
+                    </span>
+                    <span className="flex items-center gap-1.5 text-[var(--text-secondary)]">
+                      {broker.capabilities.supportsPaperTrading ? (
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
+                      ) : (
+                        <AlertTriangle className="w-3.5 h-3.5 text-amber-500 flex-shrink-0" />
+                      )}
+                      Paper Sandbox
+                    </span>
+                  </div>
+                </div>
+
+                {/* Jurisdiction & Rate Limits */}
+                <div className="p-2.5 rounded bg-[var(--bg-surface-elevated)]/50 border border-[var(--hairline)] space-y-1 text-[11px] text-[var(--text-secondary)]">
+                  <div>
+                    <strong className="text-[var(--text-primary)]">Jurisdiction:</strong> {broker.capabilities.regulatoryJurisdiction}
+                  </div>
+                  <div>
+                    <strong className="text-[var(--text-primary)]">Rate Limit:</strong> {broker.capabilities.rateLimitDescription}
+                  </div>
+                  <div className="text-[10px] text-[var(--text-muted)] italic pt-0.5">
+                    {broker.capabilities.notes}
+                  </div>
+                </div>
+
+                {/* Action CTA */}
+                <div className="flex items-center gap-2 pt-1">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setIsOrderModalOpen(true)}
+                    className="flex-1 text-xs font-mono"
+                  >
+                    {broker.status === "DISCONNECTED" ? "Connect Sandbox" : "Open Order Ticket"}
+                  </Button>
+                  <a
+                    href={broker.website}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="p-2 rounded border border-[var(--hairline)] text-[var(--text-muted)] hover:text-[#365CFF] hover:border-[#365CFF] transition-colors"
+                    title={`Open ${broker.name} documentation`}
+                  >
+                    <ExternalLink className="w-3.5 h-3.5" />
+                  </a>
+                </div>
               </div>
-              <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
-                Trader API with OAuth consent grant for retail custodial accounts.
-              </p>
-              <Button variant="outline" size="sm" className="w-full text-xs font-mono">
-                Authorize Schwab OAuth →
-              </Button>
-            </div>
+            ))}
           </div>
         </div>
       )}
@@ -378,6 +482,15 @@ export default function SettingsAndFeedsPage() {
           </CardContent>
         </Card>
       )}
+
+      {/* Test Order Modal */}
+      <OrderModal
+        isOpen={isOrderModalOpen}
+        onClose={() => setIsOrderModalOpen(false)}
+        ticker="AAPL"
+        companyName="Apple Inc."
+        spotPrice={224.50}
+      />
     </div>
   );
 }

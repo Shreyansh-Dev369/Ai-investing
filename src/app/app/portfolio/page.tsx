@@ -7,6 +7,7 @@ import {
   Plus,
   Trash2,
   RotateCcw,
+  ShieldCheck,
 } from "lucide-react";
 import { useWorkspace } from "@/context/WorkspaceContext";
 import { PortfolioHolding } from "@/types";
@@ -18,6 +19,8 @@ import { MetricCard } from "@/components/ui/MetricCard";
 import { DataProvenanceBadge } from "@/components/ui/DataProvenanceBadge";
 import { DrawdownChart } from "@/components/charts/DrawdownChart";
 import { formatCurrency } from "@/lib/utils";
+import { OrderModal } from "@/components/trading/OrderModal";
+import { getExecutedOrders } from "@/lib/orderExecution";
 
 export default function PortfolioIntelligencePage() {
   const {
@@ -33,6 +36,13 @@ export default function PortfolioIntelligencePage() {
   const [newTicker, setNewTicker] = useState("GOOGL");
   const [newShares, setNewShares] = useState("100");
   const [newCostBasis, setNewCostBasis] = useState("160");
+
+  const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
+  const [orderModalSecurity, setOrderModalSecurity] = useState<{
+    ticker: string;
+    name: string;
+    price: number;
+  }>({ ticker: "NVDA", name: "NVIDIA Corporation", price: 128.40 });
 
   const isEmpty = portfolio.holdings.length === 0;
 
@@ -127,7 +137,27 @@ export default function PortfolioIntelligencePage() {
             )}
 
             <Button
-              variant="primary"
+              variant="cobalt"
+              size="sm"
+              onClick={() => {
+                const firstSec = portfolio.holdings[0];
+                if (firstSec) {
+                  setOrderModalSecurity({
+                    ticker: firstSec.ticker,
+                    name: firstSec.name,
+                    price: firstSec.currentPrice,
+                  });
+                }
+                setIsOrderModalOpen(true);
+              }}
+              className="text-xs font-mono gap-1.5 text-white shadow-sm"
+            >
+              <ShieldCheck className="h-3.5 w-3.5" />
+              <span>Execute Order</span>
+            </Button>
+
+            <Button
+              variant="outline"
               size="sm"
               onClick={() => setIsAddModalOpen(true)}
               className="text-xs font-mono gap-1"
@@ -276,13 +306,29 @@ export default function PortfolioIntelligencePage() {
                           </div>
                         </td>
                         <td className="p-3.5 text-center pr-5">
-                          <button
-                            onClick={() => removeHolding(h.ticker)}
-                            className="p-1 border border-transparent hover:border-rose-500/40 text-[var(--text-muted)] hover:text-rose-500 cursor-pointer transition-colors"
-                            title="Remove position"
-                          >
-                            <Trash2 className="h-3.5 w-3.5" />
-                          </button>
+                          <div className="flex items-center justify-center gap-1.5">
+                            <button
+                              onClick={() => {
+                                setOrderModalSecurity({
+                                  ticker: h.ticker,
+                                  name: h.name,
+                                  price: h.currentPrice,
+                                });
+                                setIsOrderModalOpen(true);
+                              }}
+                              className="px-2 py-0.5 text-[10px] font-mono font-medium rounded border border-[var(--hairline)] hover:border-[#365CFF] hover:text-[#365CFF] text-[var(--text-secondary)] transition-colors cursor-pointer"
+                              title="Simulate Trade Ticket"
+                            >
+                              Trade
+                            </button>
+                            <button
+                              onClick={() => removeHolding(h.ticker)}
+                              className="p-1 border border-transparent hover:border-rose-500/40 text-[var(--text-muted)] hover:text-rose-500 cursor-pointer transition-colors"
+                              title="Remove position"
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))}
@@ -418,6 +464,87 @@ export default function PortfolioIntelligencePage() {
               </div>
             </CardContent>
           </Card>
+
+          {/* Simulated Order Execution Journal */}
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between border-b border-[var(--hairline)] pb-3">
+              <div>
+                <div className="text-[10px] font-mono uppercase tracking-wider text-[var(--text-muted)]">
+                  AUDIT LOG · TRADE TELEMETRY
+                </div>
+                <CardTitle className="font-serif text-lg font-normal mt-0.5">
+                  Recent Simulated Order Execution Receipts
+                </CardTitle>
+                <p className="text-xs text-[var(--text-secondary)] mt-0.5">
+                  Cryptographically keyed paper trading orders validated against institutional guardrails
+                </p>
+              </div>
+              <Badge variant="provenance">
+                Paper Sandbox Log
+              </Badge>
+            </CardHeader>
+            <CardContent className="p-0">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs border-collapse">
+                  <thead>
+                    <tr className="border-b border-[var(--hairline)] bg-[var(--bg-surface-elevated)]/40 text-[10px] font-mono text-[var(--text-muted)] uppercase tracking-wider">
+                      <th className="p-3 pl-5">Execution ID</th>
+                      <th className="p-3">Security</th>
+                      <th className="p-3">Side & Type</th>
+                      <th className="p-3 text-right">Shares</th>
+                      <th className="p-3 text-right">Fill Price</th>
+                      <th className="p-3 text-right">Gross Total</th>
+                      <th className="p-3">Broker Gateway</th>
+                      <th className="p-3 pr-5 text-right">Timestamp</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[var(--hairline)] num-tabular">
+                    {getExecutedOrders().map((order) => (
+                      <tr key={order.id} className="hover:bg-[var(--bg-surface-elevated)]/40 transition-colors">
+                        <td className="p-3 pl-5 font-mono text-[11px] text-[var(--text-secondary)]">
+                          {order.id}
+                        </td>
+                        <td className="p-3">
+                          <span className="font-mono font-bold text-[var(--text-primary)]">
+                            {order.ticker}
+                          </span>
+                          <span className="text-[10px] text-[var(--text-muted)] block truncate max-w-[120px]">
+                            {order.companyName}
+                          </span>
+                        </td>
+                        <td className="p-3">
+                          <span
+                            className={`px-1.5 py-0.5 text-[10px] font-mono font-bold rounded ${
+                              order.side === "BUY"
+                                ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                                : "bg-rose-500/10 text-rose-600 dark:text-rose-400"
+                            }`}
+                          >
+                            {order.side} {order.orderType}
+                          </span>
+                        </td>
+                        <td className="p-3 text-right font-mono text-[var(--text-primary)]">
+                          {order.shares.toLocaleString()}
+                        </td>
+                        <td className="p-3 text-right font-mono text-[var(--text-primary)]">
+                          ${order.filledPrice.toFixed(2)}
+                        </td>
+                        <td className="p-3 text-right font-mono font-semibold text-[var(--text-primary)]">
+                          ${order.totalCost.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                        </td>
+                        <td className="p-3 font-mono text-[11px] text-[#365CFF]">
+                          {order.brokerId.toUpperCase()} Sandbox
+                        </td>
+                        <td className="p-3 pr-5 text-right font-mono text-[10px] text-[var(--text-muted)]">
+                          {new Date(order.executedAt).toLocaleDateString()}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </CardContent>
+          </Card>
         </>
       )}
 
@@ -497,6 +624,15 @@ export default function PortfolioIntelligencePage() {
           </div>
         </div>
       )}
+
+      {/* Order Execution Modal */}
+      <OrderModal
+        isOpen={isOrderModalOpen}
+        onClose={() => setIsOrderModalOpen(false)}
+        ticker={orderModalSecurity.ticker}
+        companyName={orderModalSecurity.name}
+        spotPrice={orderModalSecurity.price}
+      />
     </div>
   );
 }

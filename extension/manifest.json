@@ -1,0 +1,47 @@
+{
+  "manifest_version": 3,
+  "name": "AI Investment Intelligence Companion",
+  "version": "1.0.0",
+  "description": "Institutional equity intelligence, intrinsic DCF valuation, and thesis tripwires directly on financial websites.",
+  "permissions": [
+    "activeTab",
+    "storage"
+  ],
+  "host_permissions": [
+    "*://finance.yahoo.com/*",
+    "*://www.google.com/finance/*",
+    "*://www.tradingview.com/*",
+    "*://groww.in/*",
+    "*://www.sec.gov/*"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    },
+    "default_title": "AI Investment Intelligence"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "*://finance.yahoo.com/*",
+        "*://www.google.com/finance/*",
+        "*://www.tradingview.com/*",
+        "*://groww.in/*",
+        "*://www.sec.gov/*"
+      ],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}

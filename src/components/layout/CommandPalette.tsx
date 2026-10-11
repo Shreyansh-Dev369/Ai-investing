@@ -13,6 +13,8 @@ import {
   Filter,
   X,
   ArrowRight,
+  PieChart,
+  Settings,
 } from "lucide-react";
 import { MOCK_SECURITIES } from "@/data/mockData";
 import { useWorkspace } from "@/context/WorkspaceContext";
@@ -58,6 +60,9 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
     { label: "Thesis Health Monitor", href: "/app/thesis", icon: ShieldCheck },
     { label: "Quantitative Strategy Lab", href: "/app/quant", icon: Cpu },
     { label: "Market Intelligence", href: "/app/market", icon: Globe2 },
+    { label: "Portfolio Intelligence & Risk", href: "/app/portfolio", icon: PieChart },
+    { label: "Execute Order Ticket / Paper Sandbox", href: "/app/portfolio", icon: ShieldCheck },
+    { label: "Broker Registry & Provenance Settings", href: "/app/settings", icon: Settings },
   ].filter((c) => c.label.toLowerCase().includes(query.toLowerCase()));
 
   const handleSelectSecurity = (ticker: string) => {

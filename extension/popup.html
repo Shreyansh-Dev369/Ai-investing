@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Investment Intelligence</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="extension-container">
+    <!-- Header -->
+    <header class="ext-header">
+      <div class="brand">
+        <span class="brand-dot"></span>
+        <span class="brand-title">INVESTMENT INTELLIGENCE</span>
+      </div>
+      <a href="http://localhost:3000/app" target="_blank" class="ext-dashboard-link" title="Open Full Research Operating System">
+        Workspace ↗
+      </a>
+    </header>
+
+    <!-- Page Context Detection Ribbon -->
+    <div id="detectionRibbon" class="detection-ribbon">
+      <span class="ribbon-icon">●</span>
+      <span id="detectionText">Scanning current tab for financial security...</span>
+    </div>
+
+    <!-- Quick Search / Selector Bar -->
+    <div class="search-bar">
+      <input type="text" id="tickerSearchInput" placeholder="Enter ticker (e.g. NVDA, MSFT, TCS.NS)..." spellcheck="false" autocomplete="off" />
+      <button id="searchBtn" type="button">Query</button>
+    </div>
+
+    <!-- Quick Ticker Chips -->
+    <div class="chips-container" id="quickChips">
+      <button class="chip" data-ticker="NVDA">NVDA</button>
+      <button class="chip" data-ticker="MSFT">MSFT</button>
+      <button class="chip" data-ticker="ASML">ASML</button>
+      <button class="chip" data-ticker="TSM">TSM</button>
+      <button class="chip" data-ticker="LLY">LLY</button>
+      <button class="chip" data-ticker="TCS.NS">TCS</button>
+    </div>
+
+    <!-- Main Security Card -->
+    <main id="securityDossier" class="dossier-card">
+      <!-- Title & Price Block -->
+      <div class="dossier-top">
+        <div class="security-meta">
+          <div class="ticker-badge-row">
+            <span id="secTicker" class="sec-ticker">NVDA</span>
+            <span id="secExchange" class="sec-exchange">NASDAQ</span>
+            <span id="secThesisBadge" class="thesis-badge healthy">HEALTHY</span>
+          </div>
+          <h1 id="secName" class="sec-name">NVIDIA Corporation</h1>
+          <p id="secSector" class="sec-sector">Semiconductors & AI Hardware</p>
+        </div>
+        <div class="price-meta">
+          <div id="secPrice" class="sec-price">$128.40</div>
+          <div id="secChange" class="sec-change positive">+3.12% (1D)</div>
+        </div>
+      </div>
+
+      <!-- Intrinsic DCF Valuation Gauge -->
+      <div class="section-box dcf-box">
+        <div class="section-header">
+          <span class="section-title">INTRINSIC DCF VALUATION</span>
+          <span id="dcfUpsideBadge" class="upside-badge positive">+12.3% UPSIDE</span>
+        </div>
+        <div class="dcf-values">
+          <div class="dcf-item">
+            <span class="label">Current Spot</span>
+            <span id="dcfSpotVal" class="val font-mono">$128.40</span>
+          </div>
+          <div class="dcf-divider">→</div>
+          <div class="dcf-item">
+            <span class="label">DCF Implied Value</span>
+            <span id="dcfImpliedVal" class="val font-mono bold">$144.20</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Investment Thesis Card -->
+      <div class="section-box thesis-box">
+        <div class="section-header">
+          <span class="section-title">CORE INVESTMENT THESIS</span>
+        </div>
+        <p id="secThesisText" class="thesis-text">
+          CUDA platform lock-in with Blackwell architecture driving sustained 75%+ gross margins across cloud hyperscalers.
+        </p>
+      </div>
+
+      <!-- Key Multiples Grid -->
+      <div class="multiples-grid">
+        <div class="mult-item">
+          <span class="mult-label">P/E Ratio</span>
+          <span id="multPe" class="mult-val font-mono">48.2x</span>
+        </div>
+        <div class="mult-item">
+          <span class="mult-label">EV/EBITDA</span>
+          <span id="multEv" class="mult-val font-mono">36.4x</span>
+        </div>
+        <div class="mult-item">
+          <span class="mult-label">ROIC</span>
+          <span id="multRoic" class="mult-val font-mono">68.4%</span>
+        </div>
+        <div class="mult-item">
+          <span class="mult-label">FCF Yield</span>
+          <span id="multFcf" class="mult-val font-mono">2.8%</span>
+        </div>
+      </div>
+
+      <!-- Tripwires Section -->
+      <div class="tripwire-box">
+        <div class="section-header">
+          <span class="section-title">ACTIVE THESIS TRIPWIRES</span>
+        </div>
+        <div id="tripwiresList" class="tripwires-list">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="actions-row">
+        <button id="watchlistBtn" class="btn btn-secondary">
+          <span id="watchlistIcon">★</span> <span id="watchlistLabel">Watchlist</span>
+        </button>
+        <a id="simulateOrderLink" href="#" target="_blank" class="btn btn-primary">
+          Simulate Order ⚡
+        </a>
+      </div>
+
+      <!-- Link to Full Deep Research -->
+      <div class="deep-link-container">
+        <a id="fullMemoLink" href="#" target="_blank" class="deep-memo-link">
+          Open Full Institutional Research Memo →
+        </a>
+      </div>
+    </main>
+
+    <!-- Footer Provenance Note -->
+    <footer class="ext-footer">
+      <span>SEC 10-K / Delayed 15m Feed · Zero Broker Passwords Handled</span>
+    </footer>
+  </div>
+
+  <script src="data.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

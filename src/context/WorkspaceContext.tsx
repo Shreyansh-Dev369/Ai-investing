@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { PortfolioSummary, ThesisItem, PortfolioHolding } from "@/types";
+import { PortfolioSummary, ThesisItem, PortfolioHolding, ExecutedOrder } from "@/types";
 import { MOCK_PORTFOLIO, MOCK_THESES } from "@/data/mockData";
 
 export interface WorkspaceNotification {
@@ -28,6 +28,7 @@ interface WorkspaceContextType {
   isWatchlisted: (ticker: string) => void;
   addHolding: (holding: PortfolioHolding) => void;
   removeHolding: (ticker: string) => void;
+  executePortfolioOrder: (order: ExecutedOrder) => void;
   resetPortfolioToSample: () => void;
   clearPortfolioToEmpty: () => void;
   updateThesisStatus: (id: string, status: ThesisItem["status"]) => void;
@@ -173,6 +174,107 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
     });
   };
 
+  const executePortfolioOrder = (order: ExecutedOrder) => {
+    setPortfolio((prev) => {
+      let nextCash = prev.cashBalance;
+      let nextHoldings = [...prev.holdings];
+      const existingIndex = nextHoldings.findIndex(
+        (h) => h.ticker.toUpperCase() === order.ticker.toUpperCase()
+      );
+
+      if (order.side === "BUY") {
+        nextCash = Math.max(0, nextCash - order.totalCost);
+        if (existingIndex >= 0) {
+          const existing = nextHoldings[existingIndex];
+          const newShares = existing.shares + order.shares;
+          const newCostBasis =
+            (existing.costBasis * existing.shares + order.filledPrice * order.shares) / newShares;
+          const newCurrentVal = newShares * order.filledPrice;
+          const newUnrealized = newCurrentVal - newCostBasis * newShares;
+          nextHoldings[existingIndex] = {
+            ...existing,
+            shares: newShares,
+            costBasis: Number(newCostBasis.toFixed(2)),
+            currentPrice: order.filledPrice,
+            currentValue: Number(newCurrentVal.toFixed(2)),
+            unrealizedPl: Number(newUnrealized.toFixed(2)),
+            unrealizedPlPercent: Number(
+              ((newUnrealized / (newCostBasis * newShares)) * 100).toFixed(2)
+            ),
+          };
+        } else {
+          const newVal = order.shares * order.filledPrice;
+          nextHoldings.push({
+            ticker: order.ticker,
+            name: order.companyName,
+            sector: "Technology / Growth",
+            assetClass: "Equity",
+            shares: order.shares,
+            costBasis: order.filledPrice,
+            currentPrice: order.filledPrice,
+            currentValue: newVal,
+            unrealizedPl: 0,
+            unrealizedPlPercent: 0,
+            weight: 0,
+            riskContribution: 5.0,
+            dayChangePercent: 0.0,
+          });
+        }
+      } else {
+        // SELL
+        nextCash = nextCash + order.totalCost;
+        if (existingIndex >= 0) {
+          const existing = nextHoldings[existingIndex];
+          if (order.shares >= existing.shares) {
+            nextHoldings = nextHoldings.filter((_, idx) => idx !== existingIndex);
+          } else {
+            const newShares = existing.shares - order.shares;
+            const newCurrentVal = newShares * order.filledPrice;
+            const newUnrealized = newCurrentVal - existing.costBasis * newShares;
+            nextHoldings[existingIndex] = {
+              ...existing,
+              shares: newShares,
+              currentPrice: order.filledPrice,
+              currentValue: Number(newCurrentVal.toFixed(2)),
+              unrealizedPl: Number(newUnrealized.toFixed(2)),
+              unrealizedPlPercent: Number(
+                ((newUnrealized / (existing.costBasis * newShares)) * 100).toFixed(2)
+              ),
+            };
+          }
+        }
+      }
+
+      const totalHoldingsVal = nextHoldings.reduce((sum, h) => sum + h.currentValue, 0);
+      const newTotalVal = totalHoldingsVal + nextCash;
+      const reweightedHoldings = nextHoldings.map((h) => ({
+        ...h,
+        weight: Number(((h.currentValue / newTotalVal) * 100).toFixed(2)),
+      }));
+
+      return {
+        ...prev,
+        totalValue: Number(newTotalVal.toFixed(2)),
+        cashBalance: Number(nextCash.toFixed(2)),
+        cashPercentage: Number(((nextCash / newTotalVal) * 100).toFixed(1)),
+        holdings: reweightedHoldings,
+      };
+    });
+
+    setNotifications((prev) => [
+      {
+        id: `notif-${Date.now()}`,
+        title: `${order.mode === "PAPER_SANDBOX" ? "Paper Fill" : "Order Fill"}: ${order.side} ${order.shares} ${order.ticker}`,
+        message: `Executed ${order.shares} shares of ${order.companyName} at $${order.filledPrice.toFixed(2)} (${order.mode === "PAPER_SANDBOX" ? "Simulated Sandbox" : "Live Routing"}).`,
+        time: "Just now",
+        type: "success",
+        read: false,
+        link: "/app/portfolio",
+      },
+      ...prev,
+    ]);
+  };
+
   const resetPortfolioToSample = () => {
     setPortfolio(MOCK_PORTFOLIO);
   };
@@ -237,6 +339,7 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
         isWatchlisted,
         addHolding,
         removeHolding,
+        executePortfolioOrder,
         resetPortfolioToSample,
         clearPortfolioToEmpty,
         updateThesisStatus,

@@ -2,7 +2,15 @@ export type DataProvenance =
   | 'VERIFIED_EXTERNAL' 
   | 'CALCULATED_METRIC' 
   | 'MODEL_ESTIMATE' 
-  | 'DEMO_DATA';
+  | 'DEMO_DATA'
+  | 'LIVE_FEED'
+  | 'DELAYED_15M'
+  | 'HISTORICAL_FILING'
+  | 'SIMULATED_BACKTEST'
+  | 'SANDBOX_DEMO';
+
+export * from './broker';
+export * from './order';
 
 export interface DataPointProvenance {
   type: DataProvenance;

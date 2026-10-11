@@ -8,6 +8,7 @@ import {
   Calculator,
   Users2,
   CheckCircle2,
+  ShieldCheck,
 } from "lucide-react";
 import { useWorkspace } from "@/context/WorkspaceContext";
 import { MOCK_SECURITIES, MOCK_RESEARCH_NVDA } from "@/data/mockData";
@@ -17,6 +18,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
 import { DataProvenanceBadge } from "@/components/ui/DataProvenanceBadge";
 import { AreaLineChart } from "@/components/charts/AreaLineChart";
 import { formatCurrency, formatPercent } from "@/lib/utils";
+import { OrderModal } from "@/components/trading/OrderModal";
 
 import { Suspense } from "react";
 
@@ -36,6 +38,7 @@ function SecurityResearchContent() {
     "Blackwell B200 deployment remains on schedule. CoWoS packaging allocation secured with TSMC. Monitoring customer concentration across top 4 hyperscalers (currently 38%)."
   );
   const [notesSaved, setNotesSaved] = useState(false);
+  const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
 
   useEffect(() => {
     if (tickerFromUrl && tickerFromUrl !== activeResearchTicker) {
@@ -107,7 +110,16 @@ function SecurityResearchContent() {
           </div>
 
           {/* Quick Action Navigation */}
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex flex-wrap items-center gap-2 shrink-0">
+            <Button
+              variant="cobalt"
+              size="sm"
+              onClick={() => setIsOrderModalOpen(true)}
+              className="text-xs font-mono gap-1.5 text-white shadow-sm"
+            >
+              <ShieldCheck className="h-3.5 w-3.5" />
+              <span>Order Slip (Sandbox)</span>
+            </Button>
             <Link href={`/app/valuation?ticker=${currentSecurity.ticker}`}>
               <Button variant="outline" size="sm" className="text-xs font-mono gap-1.5">
                 <Calculator className="h-3.5 w-3.5 text-[#365CFF]" />
@@ -571,6 +583,15 @@ function SecurityResearchContent() {
           </CardContent>
         </Card>
       )}
+
+      {/* Pre-trade Order Modal */}
+      <OrderModal
+        isOpen={isOrderModalOpen}
+        onClose={() => setIsOrderModalOpen(false)}
+        ticker={currentSecurity.ticker}
+        companyName={currentSecurity.name}
+        spotPrice={currentSecurity.price}
+      />
     </div>
   );
 }

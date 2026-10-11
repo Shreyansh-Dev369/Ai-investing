@@ -1,7 +1,7 @@
 import React from "react";
 import { DataProvenance } from "@/types";
 import { cn } from "@/lib/utils";
-import { CheckCircle2, Calculator, Sparkles, Database } from "lucide-react";
+import { CheckCircle2, Calculator, Sparkles, Database, Clock, Activity, FileSpreadsheet, PlayCircle } from "lucide-react";
 
 interface DataProvenanceBadgeProps {
   type: DataProvenance;
@@ -45,9 +45,44 @@ export function DataProvenanceBadge({
     },
     DEMO_DATA: {
       label: "SANDBOX SIMULATION",
-      bg: "bg-[#D8F36A]/30",
-      text: "text-[#121311] dark:text-[#D8F36A]",
-      border: "border-[#B5D638]",
+      bg: "bg-[#D8F36A]/20",
+      text: "text-[#4d5e0b] dark:text-[#D8F36A]",
+      border: "border-[#B5D638]/40",
+      icon: Database,
+    },
+    LIVE_FEED: {
+      label: "LIVE TICK FEED",
+      bg: "bg-emerald-500/10",
+      text: "text-emerald-600 dark:text-emerald-400",
+      border: "border-emerald-500/30",
+      icon: Activity,
+    },
+    DELAYED_15M: {
+      label: "15M DELAYED FEED",
+      bg: "bg-amber-500/10",
+      text: "text-amber-700 dark:text-amber-400",
+      border: "border-amber-500/30",
+      icon: Clock,
+    },
+    HISTORICAL_FILING: {
+      label: "HISTORICAL 10-K",
+      bg: "bg-slate-500/10",
+      text: "text-slate-700 dark:text-slate-300",
+      border: "border-slate-500/30",
+      icon: FileSpreadsheet,
+    },
+    SIMULATED_BACKTEST: {
+      label: "BACKTEST SIMULATION",
+      bg: "bg-sky-500/10",
+      text: "text-sky-600 dark:text-sky-400",
+      border: "border-sky-500/30",
+      icon: PlayCircle,
+    },
+    SANDBOX_DEMO: {
+      label: "PAPER SANDBOX",
+      bg: "bg-lime-500/15",
+      text: "text-lime-700 dark:text-lime-400",
+      border: "border-lime-500/30",
       icon: Database,
     },
   };
@@ -67,8 +102,8 @@ export function DataProvenanceBadge({
       )}
     >
       {showIcon && <IconComponent className="h-2.5 w-2.5 shrink-0" />}
-      <span>{config.label}</span>
-      {source && <span className="opacity-75 font-mono truncate max-w-[130px]">· {source}</span>}
+      <span>{source ? `${config.label} · ${source}` : config.label}</span>
+      {timestamp && <span className="opacity-75">({timestamp})</span>}
     </span>
   );
 }
