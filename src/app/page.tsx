@@ -1,33 +1,109 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import Link from "next/link";
 import {
   ArrowRight,
   ShieldCheck,
   Users2,
   Calculator,
-  ChevronRight,
   Activity,
+  Terminal,
+  Sparkles,
+  Sliders,
+  CheckCircle2,
+  Download,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { AreaLineChart } from "@/components/charts/AreaLineChart";
 import { MOCK_PORTFOLIO } from "@/data/mockData";
 import { formatCurrency, formatPercent } from "@/lib/utils";
+import { ApparatusPreloader } from "@/components/ui/ApparatusPreloader";
+import { OrderModal } from "@/components/trading/OrderModal";
+import { BROKER_REGISTRY } from "@/lib/brokerRegistry";
 
 export default function MarketingHomePage() {
-  const [activePreviewTab, setActivePreviewTab] = useState<"command" | "valuation" | "committee" | "thesis">("command");
+  const [forceShowPreloader, setForceShowPreloader] = useState(false);
+  const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
+  const [activePreviewTab, setActivePreviewTab] = useState<"command" | "valuation" | "committee" | "thesis" | "extension">("command");
+
+  // Interactive Live DCF Model state
+  const [growthRate, setGrowthRate] = useState<number>(25); // %
+  const [waccRate, setWaccRate] = useState<number>(9.5); // %
+  const [marginRate, setMarginRate] = useState<number>(58); // %
+
+  // Dynamic DCF Implied Calculation
+  const dcfCalculation = useMemo(() => {
+    // Current NVDA Base Metrics: $138.25 spot, 24.6B shares, Base Revenue $120B
+    const spotPrice = 138.25;
+    const baseRev = 120; // $B
+    const shares = 24.6; // B shares
+    const terminalGrowth = 0.035; // 3.5%
+
+    // Project 5 years
+    let sumPvFcf = 0;
+    let projRev = baseRev;
+    for (let yr = 1; yr <= 5; yr++) {
+      projRev = projRev * (1 + growthRate / 100);
+      const fcf = projRev * (marginRate / 100) * 0.78; // Operating cash flow after 22% tax/reinvestment
+      const discountFactor = Math.pow(1 + waccRate / 100, yr);
+      sumPvFcf += fcf / discountFactor;
+    }
+
+    const yr5Fcf = projRev * (marginRate / 100) * 0.78;
+    const terminalVal = (yr5Fcf * (1 + terminalGrowth)) / Math.max(0.01, (waccRate / 100) - terminalGrowth);
+    const pvTerminalVal = terminalVal / Math.pow(1 + waccRate / 100, 5);
+
+    const enterpriseVal = sumPvFcf + pvTerminalVal;
+    const equityVal = enterpriseVal + 28 - 10; // +$28B net cash/debt adjustment
+    const impliedPrice = Math.max(10, Math.round((equityVal / shares) * 100) / 100);
+    const upsidePct = Math.round(((impliedPrice - spotPrice) / spotPrice) * 1000) / 10;
+
+    return {
+      impliedPrice,
+      upsidePct,
+      enterpriseVal: Math.round(enterpriseVal),
+      isUndervalued: upsidePct > 0,
+    };
+  }, [growthRate, waccRate, marginRate]);
+
+  // Active broker selection showcase
+  const [selectedBrokerRegion, setSelectedBrokerRegion] = useState<"ALL" | "IN" | "US">("ALL");
+
+  const filteredBrokers = useMemo(() => {
+    if (selectedBrokerRegion === "IN") return BROKER_REGISTRY.filter((b) => b.supportedRegions[0].includes("India"));
+    if (selectedBrokerRegion === "US") return BROKER_REGISTRY.filter((b) => b.supportedRegions[0].includes("United States") || b.supportedRegions[0].includes("Global"));
+    return BROKER_REGISTRY;
+  }, [selectedBrokerRegion]);
 
   const previewTabs = [
     { id: "command", label: "01. Executive Briefing", icon: Activity },
     { id: "valuation", label: "02. DCF Valuation Lab", icon: Calculator },
     { id: "committee", label: "03. Investment Committee", icon: Users2 },
     { id: "thesis", label: "04. Thesis Surveillance", icon: ShieldCheck },
+    { id: "extension", label: "05. Browser Companion (MV3)", icon: Sparkles },
   ] as const;
+
+  const tickerTapeSecurities = [
+    { ticker: "NVDA", price: "$128.40", change: "+3.12%", dcf: "$144.20", upside: "+12.3%", status: "HEALTHY" },
+    { ticker: "MSFT", price: "$442.10", change: "+1.45%", dcf: "$485.00", upside: "+9.7%", status: "HEALTHY" },
+    { ticker: "ASML", price: "$760.30", change: "-1.82%", dcf: "$840.00", upside: "+10.5%", status: "WATCH" },
+    { ticker: "TSM", price: "$188.50", change: "+2.65%", dcf: "$220.00", upside: "+16.7%", status: "HEALTHY" },
+    { ticker: "TCS.NS", price: "₹4,210.00", change: "+1.25%", dcf: "₹4,680.00", upside: "+11.2%", status: "HEALTHY" },
+    { ticker: "LLY", price: "$884.20", change: "+2.10%", dcf: "$960.00", upside: "+8.6%", status: "HEALTHY" },
+    { ticker: "GOOGL", price: "$164.20", change: "+0.85%", dcf: "$195.00", upside: "+18.8%", status: "HEALTHY" },
+    { ticker: "AAPL", price: "$224.50", change: "+1.15%", dcf: "$242.00", upside: "+7.8%", status: "HEALTHY" },
+  ];
 
   return (
     <div className="min-h-screen bg-[var(--paper-base)] text-[#121311] flex flex-col selection:bg-[#365CFF] selection:text-white font-sans">
+      {/* 0. Sovereign Preloader */}
+      <ApparatusPreloader
+        forceShow={forceShowPreloader}
+        onComplete={() => setForceShowPreloader(false)}
+      />
+
       {/* 1. Header Masthead */}
       <header className="sticky top-0 z-40 w-full border-b border-[var(--hairline)] bg-[var(--paper-base)]/95 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
@@ -46,15 +122,19 @@ export default function MarketingHomePage() {
               </div>
             </Link>
 
-            <nav className="hidden md:flex items-center gap-6 text-xs font-mono text-[var(--stone-muted)] uppercase tracking-wider">
+            <nav className="hidden md:flex items-center gap-5 text-xs font-mono text-[var(--stone-muted)] uppercase tracking-wider">
               <a href="#apparatus" className="hover:text-[#121311] transition-colors">
                 Apparatus
               </a>
-              <a href="#methodology" className="hover:text-[#121311] transition-colors">
-                Methodology
+              <a href="#dcf-sandbox" className="hover:text-[#121311] transition-colors">
+                DCF Engine
               </a>
-              <a href="#committee" className="hover:text-[#121311] transition-colors">
-                Committee
+              <a href="#extension" className="hover:text-[#365CFF] transition-colors flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#365CFF]" />
+                Companion MV3
+              </a>
+              <a href="#brokers" className="hover:text-[#121311] transition-colors">
+                Broker Gateways
               </a>
               <a href="#provenance" className="hover:text-[#121311] transition-colors">
                 Data Provenance
@@ -62,14 +142,29 @@ export default function MarketingHomePage() {
             </nav>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5">
+            {/* Replay Preloader Trigger */}
+            <button
+              type="button"
+              onClick={() => setForceShowPreloader(true)}
+              className="hidden lg:flex items-center gap-1 px-2.5 py-1 rounded-xs border border-[var(--hairline)] hover:border-[#111210] text-[10px] font-mono text-[var(--stone-muted)] hover:text-[#111210] transition-colors cursor-pointer"
+              title="Re-run terminal calibration sequence"
+            >
+              <Terminal className="h-3 w-3 text-[#365CFF]" />
+              <span>Boot Telemetry</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setIsOrderModalOpen(true)}
+              className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xs border border-[var(--hairline)] bg-[var(--paper-surface)] hover:bg-[var(--paper-elevated)] text-xs font-mono text-[#111210] transition-colors cursor-pointer"
+            >
+              <ShieldCheck className="h-3.5 w-3.5 text-emerald-700" />
+              <span>Order Slip (Sandbox)</span>
+            </button>
+
             <Link href="/app">
-              <Button variant="outline" size="sm" className="hidden sm:inline-flex text-xs font-mono">
-                Terminal Login
-              </Button>
-            </Link>
-            <Link href="/app">
-              <Button variant="cobalt" size="sm" className="text-xs font-mono">
+              <Button variant="cobalt" size="sm" className="text-xs font-mono shadow-sm">
                 <span>Launch Workspace</span>
                 <ArrowRight className="h-3 w-3" />
               </Button>
@@ -78,7 +173,36 @@ export default function MarketingHomePage() {
         </div>
       </header>
 
-      {/* 2. Editorial Broadsheet Hero (Asymmetric Swiss Composition) */}
+      {/* 2. Real-Time Editorial Ticker Tape */}
+      <div className="border-b border-[var(--hairline)] bg-[#111210] text-[#F4F1E9] overflow-x-auto scrollbar-none py-2 px-4 text-xs font-mono">
+        <div className="max-w-7xl mx-auto flex items-center gap-6 shrink-0 whitespace-nowrap">
+          <div className="flex items-center gap-1.5 text-[10px] text-[#D8F36A] font-bold uppercase tracking-wider shrink-0">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#D8F36A] animate-ping" />
+            <span>COVERAGE SPECIMENS:</span>
+          </div>
+
+          <div className="flex items-center gap-6 divide-x divide-[#2A2D27]">
+            {tickerTapeSecurities.map((item) => (
+              <Link
+                key={item.ticker}
+                href={`/app/research?ticker=${item.ticker}`}
+                className="pl-6 first:pl-0 flex items-center gap-2 hover:text-[#D8F36A] transition-colors"
+              >
+                <span className="font-bold text-white">{item.ticker}</span>
+                <span className="text-[#A3A69C]">{item.price}</span>
+                <span className={item.change.startsWith("+") ? "text-emerald-400 font-semibold" : "text-rose-400 font-semibold"}>
+                  {item.change}
+                </span>
+                <span className="text-[10px] text-[#365CFF] bg-[#365CFF]/10 px-1 py-0.2 rounded border border-[#365CFF]/30">
+                  DCF {item.dcf} ({item.upside})
+                </span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* 3. Editorial Broadsheet Hero (Asymmetric Swiss Composition) */}
       <section className="border-b border-[var(--hairline)]">
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 min-h-[580px]">
           {/* Left Column: Bold Typography & Rationale (7 cols) */}
@@ -96,7 +220,7 @@ export default function MarketingHomePage() {
               </h1>
 
               <p className="text-sm sm:text-base text-[#464841] max-w-xl leading-relaxed mb-8 font-sans">
-                A serious research instrument for professional allocators. We unite verified point-in-time SEC EDGAR filings, mathematical Gordon DCF models, adversarial investment committee debate, and continuous thesis surveillance.
+                A serious research instrument for professional allocators. We unite verified point-in-time SEC EDGAR filings, mathematical Gordon DCF models, adversarial investment committee debate, safe broker execution, and continuous browser-wide surveillance.
               </p>
 
               <div className="flex flex-wrap items-center gap-3 pt-2">
@@ -106,16 +230,26 @@ export default function MarketingHomePage() {
                     <ArrowRight className="h-3.5 w-3.5 ml-1" />
                   </Button>
                 </Link>
-                <Link href="/app/screener">
-                  <Button variant="outline" size="lg" className="text-xs font-mono tracking-wider uppercase">
-                    <span>Screener Universe</span>
-                  </Button>
-                </Link>
+                <button
+                  type="button"
+                  onClick={() => setIsOrderModalOpen(true)}
+                  className="px-4 py-2.5 rounded-xs border border-[var(--hairline)] bg-[var(--paper-surface)] hover:bg-[var(--paper-elevated)] text-xs font-mono font-bold tracking-wider uppercase transition-colors flex items-center gap-1.5 cursor-pointer"
+                >
+                  <ShieldCheck className="h-4 w-4 text-emerald-700" />
+                  <span>Simulate Order Ticket</span>
+                </button>
+                <a
+                  href="#extension"
+                  className="px-4 py-2.5 rounded-xs border border-[#365CFF]/30 bg-[#365CFF]/5 hover:bg-[#365CFF]/10 text-xs font-mono font-bold text-[#365CFF] tracking-wider uppercase transition-colors flex items-center gap-1.5"
+                >
+                  <Sparkles className="h-4 w-4" />
+                  <span>Get Extension (MV3)</span>
+                </a>
               </div>
             </div>
 
             {/* Micro provenance stamps */}
-            <div className="mt-12 pt-6 border-t border-[var(--hairline)] grid grid-cols-3 gap-4 text-xs font-mono">
+            <div className="mt-12 pt-6 border-t border-[var(--hairline)] grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs font-mono">
               <div>
                 <div className="text-[10px] text-[var(--stone-muted)] uppercase">Coverage Universe</div>
                 <div className="text-base font-bold text-[#111210] num-tabular mt-0.5">8,400+</div>
@@ -127,9 +261,14 @@ export default function MarketingHomePage() {
                 <div className="text-[10px] text-[var(--stone-muted)] mt-0.5">2D Sensitivity Matrix</div>
               </div>
               <div>
-                <div className="text-[10px] text-[var(--stone-muted)] uppercase">Committee Inquiry</div>
-                <div className="text-base font-bold text-[#111210] num-tabular mt-0.5">5 Perspectives</div>
-                <div className="text-[10px] text-[var(--stone-muted)] mt-0.5">Adversarial Consensus</div>
+                <div className="text-[10px] text-[var(--stone-muted)] uppercase">Broker Gateways</div>
+                <div className="text-base font-bold text-emerald-700 num-tabular mt-0.5">4 Active</div>
+                <div className="text-[10px] text-[var(--stone-muted)] mt-0.5">Groww, Alpaca, IBKR</div>
+              </div>
+              <div>
+                <div className="text-[10px] text-[var(--stone-muted)] uppercase">Browser Extension</div>
+                <div className="text-base font-bold text-[#111210] num-tabular mt-0.5">Manifest V3</div>
+                <div className="text-[10px] text-[var(--stone-muted)] mt-0.5">Yahoo, Groww, SEC</div>
               </div>
             </div>
           </div>
@@ -204,7 +343,7 @@ export default function MarketingHomePage() {
 
             <div className="pt-4 border-t border-[var(--hairline)] flex items-center justify-between text-[11px] font-mono text-[var(--stone-muted)]">
               <span>EDGAR 10-K / Q2 FY26 AUDITED</span>
-              <Link href="/app/research" className="text-[#365CFF] hover:underline font-bold">
+              <Link href="/app/research?ticker=NVDA" className="text-[#365CFF] hover:underline font-bold">
                 Inspect Full Dossier →
               </Link>
             </div>
@@ -212,7 +351,374 @@ export default function MarketingHomePage() {
         </div>
       </section>
 
-      {/* 3. Interactive Analytical Workbench Showcase */}
+      {/* 4. Interactive Live DCF Model Sandbox on the Landing Page */}
+      <section id="dcf-sandbox" className="py-16 px-4 sm:px-6 bg-[#111210] text-[#F4F1E9] border-b border-[#111210]">
+        <div className="max-w-7xl mx-auto space-y-8">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-[#2A2D27] pb-6">
+            <div>
+              <div className="inline-flex items-center gap-2 px-2 py-0.5 rounded-xs bg-[#D8F36A]/10 text-[#D8F36A] border border-[#D8F36A]/30 text-[10px] font-mono font-bold uppercase tracking-widest mb-2">
+                <Calculator className="h-3.5 w-3.5" />
+                <span>LIVE MATHEMATICAL SOLVER</span>
+              </div>
+              <h2 className="text-2xl sm:text-4xl font-editorial font-normal text-white">
+                Interactive Intrinsic DCF Valuation Sandbox
+              </h2>
+            </div>
+            <p className="text-xs text-[#A3A69C] font-mono max-w-md leading-relaxed">
+              Adjust parameters below to see how changes in revenue growth, WACC, and operating margin recalibrate fair value in real time.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            {/* Left Controls: Sliders (5 cols) */}
+            <div className="lg:col-span-5 space-y-6 bg-[#181916] p-6 rounded-xs border border-[#2A2D27]">
+              <div className="flex items-center justify-between pb-3 border-b border-[#2A2D27] text-xs font-mono">
+                <span className="text-[#A3A69C] uppercase font-bold flex items-center gap-2">
+                  <Sliders className="w-3.5 h-3.5 text-[#365CFF]" /> Parameter Sensitivity
+                </span>
+                <span className="text-[10px] text-[#D8F36A]">RECALCULATING LIVE</span>
+              </div>
+
+              {/* Slider 1: Revenue Growth */}
+              <div className="space-y-2">
+                <div className="flex justify-between text-xs font-mono">
+                  <span className="text-[#A3A69C]">YoY Revenue Growth Rate</span>
+                  <span className="text-[#D8F36A] font-bold num-tabular">{growthRate}%</span>
+                </div>
+                <input
+                  type="range"
+                  min="10"
+                  max="50"
+                  step="1"
+                  value={growthRate}
+                  onChange={(e) => setGrowthRate(parseInt(e.target.value))}
+                  className="w-full accent-[#365CFF] cursor-pointer"
+                />
+                <div className="flex justify-between text-[10px] font-mono text-[#7E8079]">
+                  <span>Conservative: 10%</span>
+                  <span>Hypergrowth: 50%</span>
+                </div>
+              </div>
+
+              {/* Slider 2: WACC Discount Rate */}
+              <div className="space-y-2">
+                <div className="flex justify-between text-xs font-mono">
+                  <span className="text-[#A3A69C]">Discount Rate (WACC)</span>
+                  <span className="text-[#365CFF] font-bold num-tabular">{waccRate.toFixed(1)}%</span>
+                </div>
+                <input
+                  type="range"
+                  min="7.5"
+                  max="13.0"
+                  step="0.1"
+                  value={waccRate}
+                  onChange={(e) => setWaccRate(parseFloat(e.target.value))}
+                  className="w-full accent-[#365CFF] cursor-pointer"
+                />
+                <div className="flex justify-between text-[10px] font-mono text-[#7E8079]">
+                  <span>Low Risk: 7.5%</span>
+                  <span>High Risk: 13.0%</span>
+                </div>
+              </div>
+
+              {/* Slider 3: Operating Margin */}
+              <div className="space-y-2">
+                <div className="flex justify-between text-xs font-mono">
+                  <span className="text-[#A3A69C]">Normalized Operating Margin</span>
+                  <span className="text-white font-bold num-tabular">{marginRate}%</span>
+                </div>
+                <input
+                  type="range"
+                  min="35"
+                  max="70"
+                  step="1"
+                  value={marginRate}
+                  onChange={(e) => setMarginRate(parseInt(e.target.value))}
+                  className="w-full accent-[#365CFF] cursor-pointer"
+                />
+                <div className="flex justify-between text-[10px] font-mono text-[#7E8079]">
+                  <span>Cyclical: 35%</span>
+                  <span>Monopoly: 70%</span>
+                </div>
+              </div>
+
+              <div className="pt-2 text-[11px] font-mono text-[#7E8079] leading-relaxed">
+                Formula: <code className="text-[#A3A69C]">Equity Value = Σ PV(FCF 1..5) + [FCF₅·(1+g)] / (WACC - g) + Net Cash</code>
+              </div>
+            </div>
+
+            {/* Right Output: Real-Time Valuation Bridge (7 cols) */}
+            <div className="lg:col-span-7 bg-[#181916] p-6 sm:p-8 rounded-xs border border-[#2A2D27] space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-2 border-b border-[#2A2D27] pb-4">
+                <div>
+                  <span className="text-[10px] font-mono text-[#7E8079] uppercase tracking-wider block">
+                    VALUATION RESULT FOR NVIDIA CORP (NASDAQ: NVDA)
+                  </span>
+                  <div className="flex items-baseline gap-3 mt-1">
+                    <span className="text-4xl sm:text-5xl font-mono font-bold text-white num-tabular">
+                      ${dcfCalculation.impliedPrice.toFixed(2)}
+                    </span>
+                    <span className="text-sm font-mono text-[#7E8079]">
+                      vs $138.25 Spot
+                    </span>
+                  </div>
+                </div>
+
+                <div className={`px-3 py-1.5 rounded-xs font-mono text-sm font-bold border ${
+                  dcfCalculation.isUndervalued
+                    ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
+                    : "bg-rose-500/10 text-rose-400 border-rose-500/30"
+                }`}>
+                  {dcfCalculation.upsidePct >= 0 ? "+" : ""}{dcfCalculation.upsidePct}% {dcfCalculation.isUndervalued ? "INTRINSIC UPSIDE" : "OVERVALUED"}
+                </div>
+              </div>
+
+              {/* Metric Breakdown Grid */}
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-xs font-mono">
+                <div className="p-3 rounded-xs bg-[#111210] border border-[#2A2D27]">
+                  <span className="text-[#7E8079] text-[10px] block uppercase">Enterprise Value</span>
+                  <span className="text-lg font-bold text-white mt-0.5 block">${dcfCalculation.enterpriseVal}B</span>
+                </div>
+                <div className="p-3 rounded-xs bg-[#111210] border border-[#2A2D27]">
+                  <span className="text-[#7E8079] text-[10px] block uppercase">Terminal Growth (g)</span>
+                  <span className="text-lg font-bold text-[#D8F36A] mt-0.5 block">3.5% (GDP Floor)</span>
+                </div>
+                <div className="p-3 rounded-xs bg-[#111210] border border-[#2A2D27] col-span-2 sm:col-span-1">
+                  <span className="text-[#7E8079] text-[10px] block uppercase">Equity Shares</span>
+                  <span className="text-lg font-bold text-white mt-0.5 block">24.6B Diluted</span>
+                </div>
+              </div>
+
+              {/* Explanatory Callout */}
+              <div className="p-4 rounded-xs bg-[#111210] border border-[#2A2D27] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div className="text-xs text-[#A3A69C] leading-relaxed">
+                  Ready to test with full 2D sensitivity across 7 WACC steps and stress-test bear scenarios?
+                </div>
+                <Link href="/app/valuation?ticker=NVDA">
+                  <Button variant="cobalt" size="sm" className="text-xs font-mono whitespace-nowrap">
+                    <span>Full Valuation Lab</span>
+                    <ArrowRight className="h-3 w-3" />
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 5. Companion Browser Extension Feature Showcase (Chrome MV3) */}
+      <section id="extension" className="py-16 px-4 sm:px-6 max-w-7xl mx-auto w-full border-b border-[var(--hairline)]">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+          {/* Left Description (6 cols) */}
+          <div className="lg:col-span-6 space-y-6">
+            <div className="inline-flex items-center gap-2 px-2 py-0.5 rounded-xs bg-[#365CFF]/10 text-[#365CFF] border border-[#365CFF]/30 text-[10px] font-mono font-bold uppercase tracking-widest">
+              <Sparkles className="h-3.5 w-3.5" />
+              <span>CHROME MANIFEST V3 COMPANION EXTENSION</span>
+            </div>
+
+            <h2 className="text-2xl sm:text-4xl font-editorial font-normal text-[#111210] leading-tight">
+              Institutional Intelligence Everywhere You Browse.
+            </h2>
+
+            <p className="text-sm text-[#464841] leading-relaxed font-sans">
+              Add continuous fundamental intelligence directly to your browsing workflow. The companion extension recognizes securities on supported financial websites and instantly delivers intrinsic DCF valuations, operational tripwires, and 1-click watchlist sync.
+            </p>
+
+            {/* Supported Sites Chips */}
+            <div className="space-y-2">
+              <span className="text-[10px] font-mono text-[var(--stone-muted)] uppercase tracking-wider block">
+                Automatic Recognition On:
+              </span>
+              <div className="flex flex-wrap gap-2 text-xs font-mono">
+                {["Yahoo Finance", "Groww (IN)", "Google Finance", "TradingView", "SEC EDGAR"].map((site) => (
+                  <span key={site} className="px-2.5 py-1 rounded-xs bg-[var(--paper-surface)] border border-[var(--hairline)] text-[#111210] font-semibold flex items-center gap-1.5">
+                    <CheckCircle2 className="w-3 h-3 text-[#365CFF]" />
+                    {site}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {/* Security & Installation Guarantee */}
+            <div className="p-4 rounded-xs bg-[var(--paper-surface)] border border-[var(--hairline)] space-y-2 text-xs">
+              <div className="font-mono font-bold text-[#111210] flex items-center gap-1.5">
+                <ShieldCheck className="w-4 h-4 text-emerald-700" />
+                Zero Password Storage & Complete Client Privacy
+              </div>
+              <p className="text-[#585A52] text-[11px] leading-relaxed font-sans">
+                The extension complies strictly with Chrome Web Store MV3 policy (<code className="font-mono">script-src &apos;self&apos;</code>). It runs completely locally, never captures private banking passwords, and never scrapes private account balances.
+              </p>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-3 pt-2">
+              <Link href="/app/settings">
+                <Button variant="cobalt" size="md" className="text-xs font-mono font-bold">
+                  <Download className="w-3.5 h-3.5 mr-1" />
+                  <span>How to Install Unpacked Extension</span>
+                </Button>
+              </Link>
+              <Link href="/app">
+                <Button variant="outline" size="md" className="text-xs font-mono">
+                  <span>Open Web Workspace</span>
+                </Button>
+              </Link>
+            </div>
+          </div>
+
+          {/* Right Visual Simulation: Browser Tab with Extension Popup Docked (6 cols) */}
+          <div className="lg:col-span-6 bg-[#111210] p-4 sm:p-6 rounded-md shadow-2xl border border-[#2A2D27] text-white space-y-4">
+            {/* Fake Browser Toolbar */}
+            <div className="flex items-center justify-between pb-3 border-b border-[#2A2D27] text-xs font-mono text-[#7E8079]">
+              <div className="flex items-center gap-2">
+                <div className="flex gap-1.5">
+                  <span className="w-2.5 h-2.5 rounded-full bg-rose-500/60" />
+                  <span className="w-2.5 h-2.5 rounded-full bg-amber-500/60" />
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500/60" />
+                </div>
+                <span className="text-[10px] ml-2 text-[#A3A69C] truncate max-w-[200px]">
+                  https://finance.yahoo.com/quote/NVDA
+                </span>
+              </div>
+              <span className="px-2 py-0.5 rounded bg-[#365CFF] text-white text-[10px] font-bold">
+                NVDA ACTIVE
+              </span>
+            </div>
+
+            {/* Extension Popup Specimen Box */}
+            <div className="bg-[var(--paper-base)] text-[#111210] p-4 rounded-sm border border-[var(--hairline)] space-y-3 font-sans text-xs">
+              <div className="flex items-center justify-between border-b border-[var(--hairline)] pb-2 font-mono">
+                <div className="flex items-center gap-1.5 font-bold text-[10px]">
+                  <span className="w-2 h-2 rounded-full bg-[#365CFF]" />
+                  <span>AI INVESTMENT INTELLIGENCE</span>
+                </div>
+                <span className="text-[10px] text-emerald-700 bg-emerald-500/10 px-1.5 py-0.2 rounded font-bold">
+                  Recognized: Yahoo Finance
+                </span>
+              </div>
+
+              {/* Ticker header */}
+              <div className="flex justify-between items-baseline">
+                <div>
+                  <span className="text-base font-bold font-mono text-[#365CFF]">NVDA</span>
+                  <span className="text-xs text-[#7E8079] ml-1.5">NVIDIA Corporation</span>
+                </div>
+                <div className="text-right font-mono">
+                  <span className="font-bold text-sm">$128.40</span>
+                  <span className="text-emerald-700 text-[10px] font-bold ml-1">+3.12%</span>
+                </div>
+              </div>
+
+              {/* DCF Gauge in Extension */}
+              <div className="p-2.5 rounded bg-[var(--paper-surface)] border border-[var(--hairline)] flex items-center justify-between font-mono text-[11px]">
+                <div>
+                  <span className="text-[9px] text-[#7E8079] block uppercase">Intrinsic Fair Value</span>
+                  <span className="font-bold text-[#111210]">$144.20 / share</span>
+                </div>
+                <span className="px-2 py-0.5 rounded bg-emerald-700/10 text-emerald-800 border border-emerald-700/30 text-[10px] font-bold">
+                  +12.3% UPSIDE
+                </span>
+              </div>
+
+              {/* Thesis text */}
+              <p className="text-[11px] text-[#52544C] leading-snug">
+                CUDA ecosystem lock-in with Blackwell B200 hyperscaler commitments sustaining 75%+ hardware gross margins.
+              </p>
+
+              {/* Buttons */}
+              <div className="grid grid-cols-2 gap-2 pt-1 font-mono text-[10px]">
+                <button
+                  type="button"
+                  onClick={() => setIsOrderModalOpen(true)}
+                  className="py-1.5 px-2 rounded bg-[#365CFF] text-white font-bold hover:bg-[#2545d8] transition-colors text-center cursor-pointer"
+                >
+                  Simulate Order ⚡
+                </button>
+                <Link
+                  href="/app/research?ticker=NVDA"
+                  className="py-1.5 px-2 rounded bg-[var(--paper-surface)] border border-[var(--hairline)] text-[#111210] font-bold hover:bg-[var(--paper-elevated)] transition-colors text-center"
+                >
+                  Full Memo →
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 6. Multi-Broker Capability Registry Showcase */}
+      <section id="brokers" className="py-16 px-4 sm:px-6 bg-[var(--paper-surface)] border-b border-[var(--hairline)]">
+        <div className="max-w-7xl mx-auto space-y-8">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-[var(--hairline)] pb-4">
+            <div>
+              <span className="text-[10px] font-mono uppercase tracking-widest text-[var(--stone-muted)] block mb-1">
+                INSTITUTIONAL EXECUTION GATEWAYS
+              </span>
+              <h2 className="text-2xl sm:text-3xl font-editorial font-normal text-[#111210]">
+                Supported Broker Integrations & Guardrails
+              </h2>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-mono text-[var(--stone-muted)] uppercase">Filter Region:</span>
+              <div className="flex rounded border border-[var(--hairline)] p-0.5 bg-[var(--paper-base)] text-xs font-mono">
+                {(["ALL", "US", "IN"] as const).map((reg) => (
+                  <button
+                    key={reg}
+                    type="button"
+                    onClick={() => setSelectedBrokerRegion(reg)}
+                    className={`px-2.5 py-0.5 rounded-xs transition-colors cursor-pointer ${
+                      selectedBrokerRegion === reg
+                        ? "bg-[#111210] text-white font-bold"
+                        : "text-[var(--stone-muted)] hover:text-[#111210]"
+                    }`}
+                  >
+                    {reg === "ALL" ? "All Markets" : reg === "US" ? "US & Global" : "India (NSE/BSE)"}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Broker Cards Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-xs font-mono">
+            {filteredBrokers.map((b) => (
+              <div
+                key={b.id}
+                className="p-5 rounded-xs bg-[var(--paper-base)] border border-[var(--hairline)] flex flex-col justify-between space-y-4 hover:border-[#365CFF] transition-colors"
+              >
+                <div>
+                  <div className="flex items-start justify-between mb-2">
+                    <span className="font-bold text-sm text-[#111210]">{b.name}</span>
+                    <span className="text-[9px] px-1.5 py-0.2 rounded bg-emerald-500/10 text-emerald-800 border border-emerald-500/30 font-bold">
+                      {b.status.replace("_", " ")}
+                    </span>
+                  </div>
+
+                  <p className="text-[11px] text-[var(--stone-muted)] font-sans mb-3 leading-relaxed">
+                    {b.capabilities.notes}
+                  </p>
+
+                  <div className="space-y-1 text-[10px] text-[#52544C] pt-2 border-t border-[var(--hairline)]">
+                    <div><strong>Jurisdiction:</strong> {b.capabilities.regulatoryJurisdiction}</div>
+                    <div><strong>Auth Mode:</strong> {b.capabilities.authType}</div>
+                    <div><strong>Currencies:</strong> {b.currencies.join(", ")}</div>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setIsOrderModalOpen(true)}
+                  className="w-full py-1.5 rounded-xs bg-[#111210] text-[#F4F1E9] text-[11px] font-bold hover:bg-[#242621] transition-colors text-center cursor-pointer"
+                >
+                  Test {b.shortName} Sandbox Ticket →
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* 7. Interactive Analytical Workbench Showcase */}
       <section id="apparatus" className="py-16 px-4 sm:px-6 max-w-7xl mx-auto w-full">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8 pb-4 border-b border-[var(--hairline)]">
           <div>
@@ -462,85 +968,54 @@ export default function MarketingHomePage() {
               </div>
             </div>
           )}
-        </div>
-      </section>
 
-      {/* 4. Research Workflow Broadsheet (Editorial 5-Step Column Grid) */}
-      <section id="methodology" className="py-16 px-4 sm:px-6 bg-[var(--paper-surface)] border-y border-[var(--hairline)]">
-        <div className="max-w-7xl mx-auto">
-          <div className="mb-10 pb-4 border-b border-[var(--hairline)]">
-            <span className="text-[10px] font-mono uppercase tracking-widest text-[var(--stone-muted)] block mb-1">
-              THE ALLOCATION LIFECYCLE
-            </span>
-            <h2 className="text-2xl sm:text-3xl font-editorial font-normal text-[#111210]">
-              The 5-Phase Institutional Workflow
-            </h2>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-5 border-l border-[var(--hairline)]">
-            {[
-              {
-                step: "01",
-                title: "DISCOVERY",
-                desc: "Screen 8,000+ equities across ROIC, free cash flow yield, debt leverage, and factor revisions.",
-                link: "/app/screener",
-              },
-              {
-                step: "02",
-                title: "AUDIT",
-                desc: "5-year financial statement history, Beneish M-Score forensic red flags, and customer concentration.",
-                link: "/app/research",
-              },
-              {
-                step: "03",
-                title: "VALUATION",
-                desc: "Stress-test discounted cash flow assumptions with live 2D sensitivity across WACC and terminal growth.",
-                link: "/app/valuation",
-              },
-              {
-                step: "04",
-                title: "COMMITTEE",
-                desc: "Synthesize 5 distinct analytical inquiries, preserving genuine disagreement points rather than false consensus.",
-                link: "/app/committee",
-              },
-              {
-                step: "05",
-                title: "SURVEILLANCE",
-                desc: "Establish explicit thesis tripwires that trigger immediate amber alerts when filings diverge from targets.",
-                link: "/app/thesis",
-              },
-            ].map((w, idx) => (
-              <div
-                key={idx}
-                className="p-6 border-r border-b md:border-b-0 border-[var(--hairline)] flex flex-col justify-between group hover:bg-[var(--paper-elevated)] transition-colors"
-              >
+          {activePreviewTab === "extension" && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between border-b border-[var(--hairline)] pb-3">
                 <div>
-                  <span className="font-mono text-xs font-bold text-[#365CFF] block mb-4">
-                    PHASE {w.step}
-                  </span>
-                  <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-[#111210] mb-2">
-                    {w.title}
-                  </h3>
-                  <p className="text-xs text-[#52544C] leading-relaxed font-sans">
-                    {w.desc}
+                  <h4 className="text-sm font-mono font-bold text-[#111210] uppercase">
+                    Browser Extension Telemetry & Ticker Detection
+                  </h4>
+                  <p className="text-xs text-[var(--stone-muted)] font-sans">
+                    Runs inside Chrome / Edge / Brave with zero external script dependencies.
                   </p>
                 </div>
-                <div className="mt-6 pt-3 border-t border-[var(--hairline)]">
-                  <Link
-                    href={w.link}
-                    className="text-[10px] font-mono font-bold text-[#365CFF] group-hover:underline inline-flex items-center gap-1"
-                  >
-                    <span>EXPLORE APPARATUS</span>
-                    <ChevronRight className="h-3 w-3" />
-                  </Link>
+                <Badge variant="cobalt" size="xs">Manifest V3</Badge>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs font-mono">
+                <div className="p-4 rounded-xs bg-[var(--paper-elevated)] border border-[var(--hairline)] space-y-1.5">
+                  <span className="text-[#365CFF] font-bold">01. Ticker Recognition</span>
+                  <p className="text-[#52544C] text-[11px] font-sans">
+                    Instantly extracts symbols from Yahoo Finance, Groww, TradingView, Google Finance, and SEC EDGAR.
+                  </p>
+                </div>
+                <div className="p-4 rounded-xs bg-[var(--paper-elevated)] border border-[var(--hairline)] space-y-1.5">
+                  <span className="text-emerald-700 font-bold">02. DCF Upside Comparison</span>
+                  <p className="text-[#52544C] text-[11px] font-sans">
+                    Directly contrasts live market spot quotes with multi-stage discounted cash flow intrinsic estimates.
+                  </p>
+                </div>
+                <div className="p-4 rounded-xs bg-[var(--paper-elevated)] border border-[var(--hairline)] space-y-1.5">
+                  <span className="text-[#111210] font-bold">03. 1-Click Sync</span>
+                  <p className="text-[#52544C] text-[11px] font-sans">
+                    Save discovered securities into your shared research watchlist or jump into the order slip.
+                  </p>
                 </div>
               </div>
-            ))}
-          </div>
+
+              <div className="p-3.5 rounded-xs bg-[#111210] text-[#F4F1E9] text-xs font-mono flex items-center justify-between border border-[#111210]">
+                <span>Load extension from the local repository in 3 clicks under Developer mode.</span>
+                <a href="#extension" className="text-[#D8F36A] font-bold hover:underline">
+                  View Installation Protocol →
+                </a>
+              </div>
+            </div>
+          )}
         </div>
       </section>
 
-      {/* 5. Data Provenance & Scientific Rigor Manifesto */}
+      {/* 8. Data Provenance & Scientific Rigor Manifesto */}
       <section id="provenance" className="py-16 px-4 sm:px-6 max-w-7xl mx-auto w-full">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           <div className="lg:col-span-5 space-y-4">
@@ -606,7 +1081,7 @@ export default function MarketingHomePage() {
         </div>
       </section>
 
-      {/* 6. Primary Call To Action */}
+      {/* 9. Primary Call To Action */}
       <section className="py-20 px-4 sm:px-6 bg-[#111210] text-[#F4F1E9] border-t border-[#111210]">
         <div className="max-w-4xl mx-auto text-center space-y-6">
           <span className="text-[10px] font-mono uppercase tracking-widest text-[#A3A69C]">
@@ -625,16 +1100,18 @@ export default function MarketingHomePage() {
                 <ArrowRight className="h-3.5 w-3.5 ml-1" />
               </Button>
             </Link>
-            <Link href="/app/valuation">
-              <Button variant="outline" size="lg" className="text-xs font-mono text-white border-white/30 hover:bg-white/10 uppercase tracking-wider">
-                <span>Test Valuation Laboratory</span>
-              </Button>
-            </Link>
+            <button
+              type="button"
+              onClick={() => setIsOrderModalOpen(true)}
+              className="px-6 py-3 rounded-xs border border-white/30 text-white hover:bg-white/10 text-xs font-mono font-bold uppercase tracking-wider transition-colors cursor-pointer"
+            >
+              <span>Test Sandbox Order Ticket</span>
+            </button>
           </div>
         </div>
       </section>
 
-      {/* 7. Institutional Broadsheet Footer */}
+      {/* 10. Institutional Broadsheet Footer */}
       <footer className="border-t border-[var(--hairline)] bg-[var(--paper-base)] py-12 px-4 sm:px-6 text-xs text-[var(--stone-muted)] font-mono">
         <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-5 gap-8 mb-8">
           <div className="col-span-2 space-y-3 font-sans">
@@ -677,7 +1154,7 @@ export default function MarketingHomePage() {
             <ul className="space-y-1.5 text-[11px]">
               <li><a href="#provenance" className="hover:text-[#111210]">Data Provenance</a></li>
               <li><Link href="/app/settings" className="hover:text-[#111210]">Broker Sandboxes</Link></li>
-              <li><span>Not Investment Advice</span></li>
+              <li><button type="button" onClick={() => setForceShowPreloader(true)} className="text-[#365CFF] hover:underline cursor-pointer">Replay Boot Sequence</button></li>
               <li><span>Model Sensitivity</span></li>
             </ul>
           </div>
@@ -692,6 +1169,15 @@ export default function MarketingHomePage() {
           </div>
         </div>
       </footer>
+
+      {/* Pre-trade Order Modal on Marketing Page */}
+      <OrderModal
+        isOpen={isOrderModalOpen}
+        onClose={() => setIsOrderModalOpen(false)}
+        ticker="NVDA"
+        companyName="NVIDIA Corporation"
+        spotPrice={138.25}
+      />
     </div>
   );
 }
