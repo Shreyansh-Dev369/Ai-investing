@@ -67,55 +67,71 @@ export default function SettingsAndFeedsPage() {
   ];
 
   return (
-    <div className="space-y-6">
-      {/* Title */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-xl font-bold tracking-tight text-[var(--text-primary)]">
-            Settings, Data Feeds & Integrations
-          </h1>
-          <p className="text-xs text-[var(--text-secondary)] mt-0.5">
-            Configure external market data providers, authorized broker sandboxes, alert triggers, and audit logs.
-          </p>
+    <div className="space-y-8">
+      {/* Editorial Header */}
+      <div className="border-b border-[var(--hairline)] pb-5">
+        <div className="flex flex-wrap items-center justify-between gap-3 text-[11px] font-mono text-[var(--text-muted)] tracking-wider uppercase mb-2">
+          <div className="flex items-center gap-2">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#365CFF]" />
+            <span>DISPATCH: SYSTEM CONTROLS</span>
+            <span>·</span>
+            <span>INTEGRATION PROTOCOLS & AUDIT TRAIL</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <span className="px-1.5 py-0.5 border border-[var(--hairline)] bg-[var(--bg-surface)] text-[10px]">
+              DATA ENVIRONMENT: {isDemoMode ? "DEMO SANDBOX" : "LIVE FEEDS"}
+            </span>
+          </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => setIsDemoMode(!isDemoMode)}
-            className={`px-3 py-1.5 rounded-md text-xs font-mono font-medium border cursor-pointer transition-colors ${
-              isDemoMode
-                ? "bg-amber-950/60 text-amber-300 border-amber-700"
-                : "bg-emerald-950/60 text-emerald-300 border-emerald-700"
-            }`}
-          >
-            {isDemoMode ? "Mode: DEMO SANDBOX (Active)" : "Mode: LIVE FEEDS (Active)"}
-          </button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleExportJson}
-            className="text-xs gap-1.5"
-          >
-            <Download className="h-3.5 w-3.5" />
-            <span>Export Data (JSON)</span>
-          </Button>
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div>
+            <h1 className="font-serif text-2xl md:text-3xl lg:text-4xl font-normal text-[var(--text-primary)] tracking-tight">
+              Settings & Provenance Registry
+            </h1>
+            <p className="text-xs text-[var(--text-secondary)] mt-1.5 max-w-2xl leading-relaxed">
+              Configure external regulatory data providers, broker OAuth sandboxes, tripwire alert parameters, and cryptographic action audits.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setIsDemoMode(!isDemoMode)}
+              className={`px-3 py-1.5 text-xs font-mono border cursor-pointer transition-colors ${
+                isDemoMode
+                  ? "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/30"
+                  : "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/30"
+              }`}
+            >
+              {isDemoMode ? "MODE: DEMO (ACTIVE)" : "MODE: LIVE (ACTIVE)"}
+            </button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleExportJson}
+              className="text-xs font-mono gap-1.5"
+            >
+              <Download className="h-3.5 w-3.5" />
+              <span>Export JSON</span>
+            </Button>
+          </div>
         </div>
       </div>
 
-      {/* Tabs */}
-      <div className="flex items-center gap-1 border-b border-[var(--border-subtle)]">
+      {/* Swiss Numbered Navigation Tabs */}
+      <div className="flex items-center gap-2 border-b border-[var(--hairline)] overflow-x-auto text-xs font-mono">
         {[
-          { id: "providers", label: "Data Providers & APIs" },
-          { id: "brokers", label: "Broker Connections (OAuth)" },
-          { id: "alerts", label: "Tripwire Alert Rules" },
-          { id: "audit", label: "Security & Audit Trail" },
+          { id: "providers", label: "01. DATA PROVIDERS & APIS" },
+          { id: "brokers", label: "02. BROKER OAUTH (SANDBOX)" },
+          { id: "alerts", label: "03. TRIPWIRE THRESHOLDS" },
+          { id: "audit", label: "04. AUDIT & ACTION TRAIL" },
         ].map((t) => (
           <button
             key={t.id}
             onClick={() => setActiveTab(t.id as "providers" | "brokers" | "alerts" | "audit")}
-            className={`px-4 py-2.5 text-xs font-semibold border-b-2 transition-colors cursor-pointer ${
+            className={`px-4 py-3 border-b-2 transition-colors cursor-pointer whitespace-nowrap ${
               activeTab === t.id
-                ? "border-emerald-500 text-emerald-400 bg-[var(--bg-surface-elevated)]/30"
+                ? "border-[#365CFF] text-[#365CFF] font-semibold bg-[var(--bg-surface)]"
                 : "border-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
             }`}
           >
@@ -127,50 +143,50 @@ export default function SettingsAndFeedsPage() {
       {/* Tab 1: Data Providers */}
       {activeTab === "providers" && (
         <div className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* SEC EDGAR */}
-            <div className="p-4 rounded-lg bg-[var(--bg-surface)] border border-[var(--border-subtle)] space-y-2">
+            <div className="p-5 border border-[var(--hairline)] bg-[var(--bg-surface)] space-y-2.5">
               <div className="flex items-center justify-between">
-                <span className="font-bold text-xs text-[var(--text-primary)]">
+                <span className="font-bold font-mono text-xs text-[var(--text-primary)]">
                   SEC EDGAR Point-in-Time Filings
                 </span>
-                <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-950/60 text-emerald-400 border border-emerald-800">
+                <span className="px-2 py-0.5 text-[10px] font-mono font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
                   CONNECTED
                 </span>
               </div>
               <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
                 Direct automated access to public corporate Forms 10-K, 10-Q, 8-K, and institutional 13-F filings with XBRL financial statements.
               </p>
-              <div className="text-[10px] font-mono text-[var(--text-muted)] pt-1">
+              <div className="text-[10px] font-mono text-[var(--text-muted)] pt-2 border-t border-[var(--hairline)]">
                 Latency: Real-time public filing feed · Rate Limit: 10 req/sec
               </div>
             </div>
 
             {/* Federal Reserve FRED */}
-            <div className="p-4 rounded-lg bg-[var(--bg-surface)] border border-[var(--border-subtle)] space-y-2">
+            <div className="p-5 border border-[var(--hairline)] bg-[var(--bg-surface)] space-y-2.5">
               <div className="flex items-center justify-between">
-                <span className="font-bold text-xs text-[var(--text-primary)]">
+                <span className="font-bold font-mono text-xs text-[var(--text-primary)]">
                   Federal Reserve Economic Data (FRED)
                 </span>
-                <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-950/60 text-emerald-400 border border-emerald-800">
+                <span className="px-2 py-0.5 text-[10px] font-mono font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
                   CONNECTED
                 </span>
               </div>
               <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
                 Sovereign Treasury yields, effective fed funds rate, inflation CPI indices, and labor statistics.
               </p>
-              <div className="text-[10px] font-mono text-[var(--text-muted)] pt-1">
+              <div className="text-[10px] font-mono text-[var(--text-muted)] pt-2 border-t border-[var(--hairline)]">
                 Source: Federal Reserve Bank of St. Louis
               </div>
             </div>
 
             {/* FactSet / Refinitiv */}
-            <div className="p-4 rounded-lg bg-[var(--bg-surface)] border border-amber-900/40 space-y-2">
+            <div className="p-5 border border-[var(--hairline)] bg-[var(--bg-surface)] space-y-2.5">
               <div className="flex items-center justify-between">
-                <span className="font-bold text-xs text-[var(--text-primary)]">
+                <span className="font-bold font-mono text-xs text-[var(--text-primary)]">
                   FactSet / Refinitiv Financial Wire
                 </span>
-                <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-amber-950/60 text-amber-400 border border-amber-800">
+                <span className="px-2 py-0.5 text-[10px] font-mono font-bold bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/30">
                   SANDBOX SIMULATION
                 </span>
               </div>
@@ -184,9 +200,9 @@ export default function SettingsAndFeedsPage() {
                     placeholder="Enter Enterprise API Key..."
                     value={apiKeyInput}
                     onChange={(e) => setApiKeyInput(e.target.value)}
-                    className="flex-1 h-8 px-2.5 rounded bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-xs text-[var(--text-primary)] placeholder-[var(--text-muted)]"
+                    className="flex-1 h-8 px-3 border border-[var(--hairline)] bg-[var(--bg-surface-elevated)]/40 text-xs text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[#365CFF]"
                   />
-                  <Button type="submit" variant="secondary" size="sm" className="text-xs">
+                  <Button type="submit" variant="outline" size="sm" className="text-xs font-mono">
                     {isSaved ? "Saved" : "Connect"}
                   </Button>
                 </form>
@@ -194,19 +210,19 @@ export default function SettingsAndFeedsPage() {
             </div>
 
             {/* Bloomberg OpenFIGI */}
-            <div className="p-4 rounded-lg bg-[var(--bg-surface)] border border-[var(--border-subtle)] space-y-2">
+            <div className="p-5 border border-[var(--hairline)] bg-[var(--bg-surface)] space-y-2.5">
               <div className="flex items-center justify-between">
-                <span className="font-bold text-xs text-[var(--text-primary)]">
+                <span className="font-bold font-mono text-xs text-[var(--text-primary)]">
                   Bloomberg OpenFIGI Instrument Mapping
                 </span>
-                <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-950/60 text-emerald-400 border border-emerald-800">
+                <span className="px-2 py-0.5 text-[10px] font-mono font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
                   CONNECTED
                 </span>
               </div>
               <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
                 Global Financial Instrument Identifier system for cross-asset ticker and CUSIP/ISIN resolution.
               </p>
-              <div className="text-[10px] font-mono text-[var(--text-muted)] pt-1">
+              <div className="text-[10px] font-mono text-[var(--text-muted)] pt-2 border-t border-[var(--hairline)]">
                 Permission: Read-Only Open Source Standard
               </div>
             </div>
@@ -218,8 +234,8 @@ export default function SettingsAndFeedsPage() {
       {activeTab === "brokers" && (
         <div className="space-y-6">
           {/* Security Guarantee Box */}
-          <div className="p-4 rounded-lg bg-emerald-950/30 border border-emerald-800/60 text-xs space-y-2">
-            <div className="flex items-center gap-2 font-bold text-emerald-400">
+          <div className="p-5 border border-emerald-500/30 bg-emerald-500/5 text-xs space-y-2">
+            <div className="flex items-center gap-2 font-mono font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider">
               <Lock className="h-4 w-4" />
               <span>Architectural Security Guarantee & Credential Isolation</span>
             </div>
@@ -228,45 +244,45 @@ export default function SettingsAndFeedsPage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-xs">
             {/* Interactive Brokers */}
-            <div className="p-4 rounded-lg bg-[var(--bg-surface)] border border-[var(--border-subtle)] space-y-3">
+            <div className="p-5 border border-[var(--hairline)] bg-[var(--bg-surface)] space-y-3">
               <div className="flex items-center justify-between">
                 <span className="font-bold text-[var(--text-primary)]">Interactive Brokers (IBKR)</span>
                 <Badge variant="outline" size="xs">DISCONNECTED</Badge>
               </div>
-              <p className="text-[var(--text-secondary)] leading-relaxed">
+              <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
                 Client Portal API Gateway with institutional multi-currency custody.
               </p>
-              <Button variant="secondary" size="sm" className="w-full text-xs">
+              <Button variant="outline" size="sm" className="w-full text-xs font-mono">
                 Authorize IBKR OAuth →
               </Button>
             </div>
 
             {/* Alpaca */}
-            <div className="p-4 rounded-lg bg-[var(--bg-surface)] border border-emerald-900/40 space-y-3">
+            <div className="p-5 border border-emerald-500/30 bg-[var(--bg-surface)] space-y-3">
               <div className="flex items-center justify-between">
                 <span className="font-bold text-[var(--text-primary)]">Alpaca Markets</span>
                 <Badge variant="positive" size="xs">PAPER SANDBOX</Badge>
               </div>
-              <p className="text-[var(--text-secondary)] leading-relaxed">
+              <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
                 Paper trading execution environment for quantitative algorithmic testing.
               </p>
-              <Button variant="outline" size="sm" className="w-full text-xs">
+              <Button variant="outline" size="sm" className="w-full text-xs font-mono">
                 Manage Sandbox →
               </Button>
             </div>
 
             {/* Charles Schwab */}
-            <div className="p-4 rounded-lg bg-[var(--bg-surface)] border border-[var(--border-subtle)] space-y-3">
+            <div className="p-5 border border-[var(--hairline)] bg-[var(--bg-surface)] space-y-3">
               <div className="flex items-center justify-between">
                 <span className="font-bold text-[var(--text-primary)]">Charles Schwab API</span>
                 <Badge variant="outline" size="xs">DISCONNECTED</Badge>
               </div>
-              <p className="text-[var(--text-secondary)] leading-relaxed">
+              <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
                 Trader API with OAuth consent grant for retail custodial accounts.
               </p>
-              <Button variant="secondary" size="sm" className="w-full text-xs">
+              <Button variant="outline" size="sm" className="w-full text-xs font-mono">
                 Authorize Schwab OAuth →
               </Button>
             </div>
@@ -277,38 +293,43 @@ export default function SettingsAndFeedsPage() {
       {/* Tab 3: Alert Rules */}
       {activeTab === "alerts" && (
         <Card>
-          <CardHeader>
-            <CardTitle className="text-sm">Automated Thesis Tripwire Thresholds</CardTitle>
+          <CardHeader className="border-b border-[var(--hairline)] pb-3">
+            <div className="text-[10px] font-mono uppercase tracking-wider text-[var(--text-muted)]">
+              RULE ENGINE
+            </div>
+            <CardTitle className="font-serif text-lg font-normal mt-0.5">
+              Automated Thesis Tripwire Thresholds
+            </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4 text-xs">
-            <div className="flex items-center justify-between p-3 rounded bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)]">
+          <CardContent className="pt-4 space-y-4 text-xs">
+            <div className="flex items-center justify-between p-4 border border-[var(--hairline)] bg-[var(--bg-surface-elevated)]/30">
               <div>
                 <span className="font-semibold text-[var(--text-primary)]">Booking Variance Alert</span>
-                <p className="text-[11px] text-[var(--text-muted)]">
+                <p className="text-xs text-[var(--text-secondary)] mt-0.5">
                   Trigger amber WATCH when quarterly backlog or bookings drop below assumption
                 </p>
               </div>
-              <span className="font-mono text-emerald-400 font-bold">&gt; 15% Variance</span>
+              <span className="font-mono text-emerald-600 dark:text-emerald-400 font-bold">&gt; 15% Variance</span>
             </div>
 
-            <div className="flex items-center justify-between p-3 rounded bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)]">
+            <div className="flex items-center justify-between p-4 border border-[var(--hairline)] bg-[var(--bg-surface-elevated)]/30">
               <div>
                 <span className="font-semibold text-[var(--text-primary)]">Operating Margin Degradation</span>
-                <p className="text-[11px] text-[var(--text-muted)]">
+                <p className="text-xs text-[var(--text-secondary)] mt-0.5">
                   Trigger warning when gross or operating margin slips for two consecutive quarters
                 </p>
               </div>
-              <span className="font-mono text-emerald-400 font-bold">&gt; 250 bps Drop</span>
+              <span className="font-mono text-emerald-600 dark:text-emerald-400 font-bold">&gt; 250 bps Drop</span>
             </div>
 
-            <div className="flex items-center justify-between p-3 rounded bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)]">
+            <div className="flex items-center justify-between p-4 border border-[var(--hairline)] bg-[var(--bg-surface-elevated)]/30">
               <div>
                 <span className="font-semibold text-[var(--text-primary)]">Customer Concentration Spike</span>
-                <p className="text-[11px] text-[var(--text-muted)]">
+                <p className="text-xs text-[var(--text-secondary)] mt-0.5">
                   Flag elevated dependency when top 4 customers exceed critical revenue threshold
                 </p>
               </div>
-              <span className="font-mono text-emerald-400 font-bold">&gt; 40% Share</span>
+              <span className="font-mono text-emerald-600 dark:text-emerald-400 font-bold">&gt; 40% Share</span>
             </div>
           </CardContent>
         </Card>
@@ -317,28 +338,33 @@ export default function SettingsAndFeedsPage() {
       {/* Tab 4: Security & Audit Trail */}
       {activeTab === "audit" && (
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
+          <CardHeader className="flex flex-row items-center justify-between border-b border-[var(--hairline)] pb-3">
             <div>
-              <CardTitle className="text-sm">Cryptographic Audit & Action Trail</CardTitle>
-              <p className="text-xs text-[var(--text-muted)] mt-0.5">
+              <div className="text-[10px] font-mono uppercase tracking-wider text-[var(--text-muted)]">
+                IMMUTABLE AUDIT LOG
+              </div>
+              <CardTitle className="font-serif text-lg font-normal mt-0.5">
+                Cryptographic Action Trail
+              </CardTitle>
+              <p className="text-xs text-[var(--text-secondary)] mt-0.5">
                 Immutable ledger of analyst parameter calibrations and model edits
               </p>
             </div>
             <Badge variant="provenance">Audit Engine v1.8</Badge>
           </CardHeader>
           <CardContent className="p-0">
-            <div className="divide-y divide-[var(--border-subtle)]/40 text-xs">
+            <div className="divide-y divide-[var(--hairline)] text-xs">
               {auditLogs.map((log, idx) => (
                 <div
                   key={idx}
-                  className="p-3.5 px-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2 hover:bg-[var(--bg-surface-elevated)]/30"
+                  className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2 hover:bg-[var(--bg-surface-elevated)]/30 transition-colors"
                 >
                   <div>
                     <div className="font-semibold text-[var(--text-primary)] flex items-center gap-2">
                       <span>{log.action}</span>
-                      <span className="text-[11px] font-mono text-emerald-400">· {log.target}</span>
+                      <span className="text-[11px] font-mono text-[#365CFF]">· {log.target}</span>
                     </div>
-                    <div className="text-[11px] text-[var(--text-secondary)] mt-0.5">
+                    <div className="text-xs text-[var(--text-secondary)] mt-0.5">
                       {log.detail}
                     </div>
                   </div>

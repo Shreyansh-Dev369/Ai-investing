@@ -1,20 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
-import Link from "next/link";
-import {
-  Globe2,
-  TrendingUp,
-  Activity,
-  Calendar,
-  AlertCircle,
-  FileText,
-  ExternalLink,
-  ShieldCheck,
-  Sparkles,
-  ArrowRight,
-  Info,
-} from "lucide-react";
+import React from "react";
+import { Info } from "lucide-react";
 import {
   MOCK_INDICES,
   MOCK_MACRO_INDICATORS,
@@ -24,10 +11,8 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { DataProvenanceBadge } from "@/components/ui/DataProvenanceBadge";
 import { Sparkline } from "@/components/charts/Sparkline";
-import { formatCurrency, formatPercent } from "@/lib/utils";
 
 export default function MarketIntelligencePage() {
-  const [selectedCategory, setSelectedCategory] = useState<string>("ALL");
 
   const sectors = [
     { name: "Information Technology", move: 1.42, weight: "31.2%" },
@@ -44,33 +29,42 @@ export default function MarketIntelligencePage() {
   ];
 
   return (
-    <div className="space-y-6">
-      {/* Title & Data Freshness Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
+    <div className="space-y-8">
+      {/* Editorial Header */}
+      <div className="border-b border-[var(--hairline)] pb-5">
+        <div className="flex flex-wrap items-center justify-between gap-3 text-[11px] font-mono text-[var(--text-muted)] tracking-wider uppercase mb-2">
           <div className="flex items-center gap-2">
-            <h1 className="text-xl font-bold tracking-tight text-[var(--text-primary)]">
-              Market Intelligence & Macro Context
-            </h1>
+            <span className="w-1.5 h-1.5 rounded-full bg-[#365CFF]" />
+            <span>DISPATCH: MACRO INTELLIGENCE</span>
+            <span>·</span>
+            <span>SOVEREIGN RATES & SECTOR ROTATION</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <span className="px-1.5 py-0.5 border border-[var(--hairline)] bg-[var(--bg-surface)] text-[10px]">
+              DATA DELAY: 15M AUDITED
+            </span>
             <DataProvenanceBadge type="VERIFIED_EXTERNAL" source="FRED / BLS / Wire Feeds" />
           </div>
-          <p className="text-xs text-[var(--text-secondary)] mt-0.5">
-            Macroeconomic rate structure, sovereign yield curves, sector rotation, and sourced financial wire catalysts.
-          </p>
         </div>
 
-        <div className="flex items-center gap-2 text-xs font-mono text-[var(--text-muted)]">
-          <span className="h-2 w-2 rounded-full bg-emerald-400" />
-          <span>Market Session: Open · Data Delay: 15m</span>
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div>
+            <h1 className="font-serif text-2xl md:text-3xl lg:text-4xl font-normal text-[var(--text-primary)] tracking-tight">
+              Market Intelligence & Macro Context
+            </h1>
+            <p className="text-xs text-[var(--text-secondary)] mt-1.5 max-w-2xl leading-relaxed">
+              Global rate curves, central bank liquidity conditions, cross-sector dispersion, and verified market wire catalysts.
+            </p>
+          </div>
         </div>
       </div>
 
       {/* Major Benchmark Indices Strip */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
         {MOCK_INDICES.map((idx) => (
           <div
             key={idx.symbol}
-            className="p-3.5 rounded-lg bg-[var(--bg-surface)] border border-[var(--border-subtle)] space-y-2"
+            className="p-4 border border-[var(--hairline)] bg-[var(--bg-surface)] space-y-2.5"
           >
             <div className="flex items-center justify-between text-xs">
               <span className="font-semibold text-[var(--text-primary)]">{idx.name}</span>
@@ -78,12 +72,12 @@ export default function MarketIntelligencePage() {
             </div>
 
             <div className="flex items-baseline justify-between num-tabular">
-              <span className="font-mono text-base font-bold text-[var(--text-primary)]">
+              <span className="font-mono text-lg font-bold text-[var(--text-primary)]">
                 {idx.value.toLocaleString()}
               </span>
               <span
                 className={`text-xs font-mono font-semibold ${
-                  idx.changePct >= 0 ? "text-emerald-400" : "text-rose-400"
+                  idx.changePct >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"
                 }`}
               >
                 {idx.changePct >= 0 ? "+" : ""}
@@ -91,10 +85,10 @@ export default function MarketIntelligencePage() {
               </span>
             </div>
 
-            <div className="pt-1 flex items-center justify-between">
-              <Sparkline data={idx.history} width={70} height={18} />
+            <div className="pt-1.5 border-t border-[var(--hairline)] flex items-center justify-between">
+              <Sparkline data={idx.history} width={64} height={18} />
               <div className="text-[10px] font-mono text-[var(--text-muted)]">
-                Range: {idx.low52.toFixed(0)} - {idx.high52.toFixed(0)}
+                52W: {idx.low52.toFixed(0)}-{idx.high52.toFixed(0)}
               </div>
             </div>
           </div>
@@ -102,16 +96,21 @@ export default function MarketIntelligencePage() {
       </div>
 
       {/* Main Grid: Macro Indicators & Sector Rotation on Left, News on Right */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Left Column (2 spans) */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="lg:col-span-2 space-y-8">
           {/* Macro Indicators Table */}
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardHeader className="flex flex-row items-center justify-between border-b border-[var(--hairline)] pb-3">
               <div>
-                <CardTitle>Core Macroeconomic Indicators</CardTitle>
-                <p className="text-xs text-[var(--text-muted)] mt-0.5">
-                  Federal Reserve policy, inflation prints, and financial conditions
+                <div className="text-[10px] font-mono uppercase tracking-wider text-[var(--text-muted)]">
+                  SCHEDULE 9.1 · OFFICIAL RELEASES
+                </div>
+                <CardTitle className="font-serif text-lg font-normal mt-0.5">
+                  Core Macroeconomic Indicators
+                </CardTitle>
+                <p className="text-xs text-[var(--text-secondary)] mt-0.5">
+                  Federal Reserve policy rate, inflation prints, and financial conditions
                 </p>
               </div>
               <Badge variant="provenance">Official Government Series</Badge>
@@ -120,31 +119,31 @@ export default function MarketIntelligencePage() {
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs border-collapse">
                   <thead>
-                    <tr className="border-b border-[var(--border-subtle)] bg-[var(--bg-surface-elevated)] text-[11px] text-[var(--text-muted)] font-medium">
-                      <th className="p-3 pl-4">Economic Series</th>
-                      <th className="p-3">Current Print</th>
-                      <th className="p-3">Prior Release</th>
-                      <th className="p-3">Source</th>
-                      <th className="p-3 pr-4">Macroeconomic Implication</th>
+                    <tr className="border-b border-[var(--hairline)] bg-[var(--bg-surface-elevated)]/40 text-[10px] font-mono text-[var(--text-muted)] uppercase tracking-wider">
+                      <th className="p-3.5 pl-5">Economic Series</th>
+                      <th className="p-3.5">Current Print</th>
+                      <th className="p-3.5">Prior Release</th>
+                      <th className="p-3.5">Source</th>
+                      <th className="p-3.5 pr-5">Macroeconomic Implication</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-[var(--border-subtle)]/40 num-tabular">
+                  <tbody className="divide-y divide-[var(--hairline)] num-tabular">
                     {MOCK_MACRO_INDICATORS.map((m) => (
-                      <tr key={m.id} className="hover:bg-[var(--bg-surface-elevated)]/30">
-                        <td className="p-3 pl-4">
+                      <tr key={m.id} className="hover:bg-[var(--bg-surface-elevated)]/40 transition-colors">
+                        <td className="p-3.5 pl-5">
                           <div className="font-semibold text-[var(--text-primary)]">{m.name}</div>
-                          <div className="text-[10px] text-[var(--text-muted)]">{m.category}</div>
+                          <div className="text-[10px] font-mono text-[var(--text-muted)]">{m.category}</div>
                         </td>
-                        <td className="p-3 font-mono font-bold text-emerald-400">
+                        <td className="p-3.5 font-mono font-bold text-emerald-600 dark:text-emerald-400">
                           {m.currentValue}
                         </td>
-                        <td className="p-3 font-mono text-[var(--text-muted)]">
+                        <td className="p-3.5 font-mono text-[var(--text-muted)]">
                           {m.previousValue}
                         </td>
-                        <td className="p-3 text-[11px] text-[var(--text-secondary)]">
+                        <td className="p-3.5 text-[11px] font-mono text-[var(--text-secondary)]">
                           {m.source}
                         </td>
-                        <td className="p-3 pr-4 text-[11px] text-[var(--text-secondary)] max-w-xs leading-relaxed">
+                        <td className="p-3.5 pr-5 text-xs text-[var(--text-secondary)] max-w-xs leading-relaxed">
                           {m.implication}
                         </td>
                       </tr>
@@ -157,32 +156,37 @@ export default function MarketIntelligencePage() {
 
           {/* Sector Heatmap & Dispersion */}
           <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm">S&P 500 Sector Daily Return Dispersion</CardTitle>
+            <CardHeader className="border-b border-[var(--hairline)] pb-3">
+              <div className="text-[10px] font-mono uppercase tracking-wider text-[var(--text-muted)]">
+                FIGURE 9.2 · SECTOR DISPERSION
+              </div>
+              <CardTitle className="font-serif text-lg font-normal mt-0.5">
+                S&P 500 Sector Daily Return Dispersion
+              </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs num-tabular">
+            <CardContent className="pt-4">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs num-tabular">
                 {sectors.map((s) => {
                   const isUp = s.move >= 0;
                   return (
                     <div
                       key={s.name}
-                      className={`p-2.5 rounded-lg border text-left flex flex-col justify-between ${
+                      className={`p-3 border text-left flex flex-col justify-between ${
                         isUp
-                          ? "bg-emerald-950/20 border-emerald-900/40"
-                          : "bg-rose-950/20 border-rose-900/40"
+                          ? "bg-emerald-500/5 border-emerald-500/30"
+                          : "bg-rose-500/5 border-rose-500/30"
                       }`}
                     >
                       <div className="text-[11px] text-[var(--text-primary)] font-medium truncate">
                         {s.name}
                       </div>
-                      <div className="flex items-baseline justify-between mt-2">
+                      <div className="flex items-baseline justify-between mt-2.5 pt-1.5 border-t border-[var(--hairline)]/40">
                         <span className="text-[10px] text-[var(--text-muted)] font-mono">
                           {s.weight}
                         </span>
                         <span
                           className={`font-mono font-bold text-xs ${
-                            isUp ? "text-emerald-400" : "text-rose-400"
+                            isUp ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"
                           }`}
                         >
                           {isUp ? "+" : ""}
@@ -198,16 +202,23 @@ export default function MarketIntelligencePage() {
         </div>
 
         {/* Right Column (1 span): Sourced Catalysts Feed */}
-        <div className="space-y-6">
+        <div className="space-y-8">
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm">Verified Financial Wire News</CardTitle>
+            <CardHeader className="flex flex-row items-center justify-between border-b border-[var(--hairline)] pb-3">
+              <div>
+                <div className="text-[10px] font-mono uppercase tracking-wider text-[var(--text-muted)]">
+                  NEWS WIRE
+                </div>
+                <CardTitle className="font-serif text-lg font-normal mt-0.5">
+                  Verified Wire Feeds
+                </CardTitle>
+              </div>
               <Badge variant="provenance">Sourced Wire Feeds</Badge>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="pt-4 space-y-4">
               {/* Disclaimer */}
-              <div className="p-2.5 rounded bg-sky-950/30 border border-sky-900/40 text-[11px] text-sky-300 leading-relaxed">
-                <Info className="h-3.5 w-3.5 inline mr-1 text-sky-400" />
+              <div className="p-3 border border-[#365CFF]/30 bg-[#365CFF]/5 text-[11px] text-[var(--text-secondary)] leading-relaxed">
+                <Info className="h-3.5 w-3.5 inline mr-1.5 text-[#365CFF]" />
                 <span>
                   Sentiment scores are model-generated natural language estimates, not objective financial facts.
                 </span>
@@ -216,26 +227,26 @@ export default function MarketIntelligencePage() {
               {MOCK_NEWS_CATALYSTS.map((n) => (
                 <div
                   key={n.id}
-                  className="p-3.5 rounded-lg bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] space-y-2 text-xs"
+                  className="p-4 border border-[var(--hairline)] bg-[var(--bg-surface-elevated)]/30 space-y-2 text-xs"
                 >
                   <div className="flex items-start justify-between gap-2">
                     <span className="font-semibold text-[var(--text-primary)] leading-snug">
                       {n.headline}
                     </span>
                     {n.ticker && (
-                      <span className="px-1.5 py-0.5 rounded bg-[var(--bg-surface)] border border-[var(--border-subtle)] font-mono text-[10px] text-emerald-400 shrink-0">
+                      <span className="px-1.5 py-0.5 border border-[var(--hairline)] bg-[var(--bg-surface)] font-mono text-[10px] text-[#365CFF] shrink-0">
                         {n.ticker}
                       </span>
                     )}
                   </div>
 
-                  <p className="text-[11px] text-[var(--text-secondary)] leading-relaxed">
+                  <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
                     {n.summary}
                   </p>
 
-                  <div className="flex items-center justify-between text-[10px] font-mono text-[var(--text-muted)] pt-1 border-t border-[var(--border-subtle)]/50">
+                  <div className="flex items-center justify-between text-[10px] font-mono text-[var(--text-muted)] pt-2 border-t border-[var(--hairline)]">
                     <span>{n.source}</span>
-                    <span className="text-emerald-400">Sentiment: +{n.sentimentScore.toFixed(2)}</span>
+                    <span className="text-[#365CFF]">Sentiment: +{n.sentimentScore.toFixed(2)}</span>
                   </div>
                 </div>
               ))}

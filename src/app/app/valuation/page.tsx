@@ -26,9 +26,9 @@ export default function ValuationLaboratoryPage() {
     reinvestmentRate: 6.0,
     wacc: 9.5,
     terminalGrowthRate: 3.5,
-    currentRevenue: 112.8, // $B
-    netDebt: -24.3, // Net cash of $24.3B
-    sharesOutstanding: 24.5, // 24.5B shares post-split
+    currentRevenue: 112.8,
+    netDebt: -24.3,
+    sharesOutstanding: 24.5,
   };
 
   const [inputs, setInputs] = useState<DCFInputs>(defaultInputs);
@@ -69,60 +69,74 @@ export default function ValuationLaboratoryPage() {
   const tickers = ["NVDA", "MSFT", "ASML", "LLY", "TSM"];
 
   return (
-    <div className="space-y-6">
-      {/* Page Title & Ticker Selector */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
+    <div className="space-y-8">
+      {/* Editorial Header */}
+      <div className="border-b border-[var(--hairline)] pb-5">
+        <div className="flex flex-wrap items-center justify-between gap-3 text-[11px] font-mono text-[var(--text-muted)] tracking-wider uppercase mb-2">
           <div className="flex items-center gap-2">
-            <h1 className="text-xl font-bold tracking-tight text-[var(--text-primary)]">
-              Valuation Laboratory
-            </h1>
-            <DataProvenanceBadge type="MODEL_ESTIMATE" source="Discounted Cash Flow" />
+            <span className="w-1.5 h-1.5 rounded-full bg-[#365CFF]" />
+            <span>DISPATCH: VALUATION BENCHMARK</span>
+            <span>·</span>
+            <span>INTRINSIC DISCOUNTED CASH FLOW MODEL</span>
           </div>
-          <p className="text-xs text-[var(--text-secondary)] mt-0.5">
-            Gordon Growth DCF engine with live 2D WACC and terminal growth sensitivity.
-          </p>
+          <div className="flex items-center gap-3">
+            <DataProvenanceBadge type="MODEL_ESTIMATE" source="Discounted Cash Flow" />
+            <span className="px-1.5 py-0.5 border border-[var(--hairline)] bg-[var(--bg-surface)] text-[10px]">
+              2D SENSITIVITY ACTIVE
+            </span>
+          </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-[var(--text-muted)] font-medium">Security:</span>
-          {tickers.map((t) => (
-            <button
-              key={t}
-              onClick={() => setActiveResearchTicker(t)}
-              className={`px-2.5 py-1 rounded text-xs font-mono font-semibold transition-colors cursor-pointer border ${
-                activeResearchTicker === t
-                  ? "bg-emerald-950/60 text-emerald-300 border-emerald-700"
-                  : "bg-[var(--bg-surface)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:text-[var(--text-primary)]"
-              }`}
-            >
-              {t}
-            </button>
-          ))}
-          <Button variant="outline" size="sm" onClick={handleReset} className="text-xs gap-1">
-            <RotateCcw className="h-3.5 w-3.5" />
-            <span>Reset</span>
-          </Button>
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div>
+            <h1 className="font-serif text-2xl md:text-3xl lg:text-4xl font-normal text-[var(--text-primary)] tracking-tight">
+              Valuation Laboratory
+            </h1>
+            <p className="text-xs text-[var(--text-secondary)] mt-1.5 max-w-2xl leading-relaxed">
+              Gordon Growth multi-stage DCF engine with dynamic 2D WACC and terminal growth sensitivity matrices.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-mono text-[var(--text-muted)] mr-1">TICKER:</span>
+            {tickers.map((t) => (
+              <button
+                key={t}
+                onClick={() => setActiveResearchTicker(t)}
+                className={`px-3 py-1 font-mono text-xs font-semibold transition-colors cursor-pointer border ${
+                  activeResearchTicker === t
+                    ? "bg-[#111210] dark:bg-[#F4F1E9] text-[#F4F1E9] dark:text-[#111210] border-transparent"
+                    : "bg-transparent text-[var(--text-secondary)] border-[var(--hairline)] hover:border-[#365CFF] hover:text-[#365CFF]"
+                }`}
+              >
+                {t}
+              </button>
+            ))}
+            <Button variant="outline" size="sm" onClick={handleReset} className="text-xs font-mono gap-1 ml-2">
+              <RotateCcw className="h-3 w-3" />
+              <span>Reset</span>
+            </Button>
+          </div>
         </div>
       </div>
 
-      {/* Primary Output Valuation Bridge Banner */}
-      <div className="p-6 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-strong)] shadow-lg">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+      {/* Intrinsic Valuation Callout Card */}
+      <div className="border border-[var(--hairline)] bg-[var(--bg-surface)] p-6 space-y-6">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 pb-6 border-b border-[var(--hairline)]">
           <div>
-            <div className="text-[11px] font-mono text-[var(--text-muted)] uppercase tracking-wider">
-              {currentSecurity.ticker} ({currentSecurity.name}) · Implied Intrinsic Value
+            <div className="text-[10px] font-mono text-[var(--text-muted)] uppercase tracking-wider">
+              {currentSecurity.ticker} ({currentSecurity.name}) · IMPLIED INTRINSIC VALUE
             </div>
-            <div className="flex items-baseline gap-3 mt-1">
-              <span className="text-3xl sm:text-4xl font-bold font-mono text-emerald-400 num-tabular">
+            <div className="flex items-baseline gap-3 mt-1.5">
+              <span className="font-serif text-4xl sm:text-5xl font-normal text-[var(--text-primary)] num-tabular">
                 ${dcfOutput.impliedPerShare.toFixed(2)}
               </span>
-              <span className="text-sm font-semibold text-[var(--text-secondary)]">per share</span>
+              <span className="text-sm font-mono text-[var(--text-secondary)]">per share</span>
               <span
-                className={`font-mono text-xs font-bold px-2 py-0.5 rounded ${
+                className={`font-mono text-xs font-bold px-2 py-0.5 border ${
                   dcfOutput.upsideDownside >= 0
-                    ? "text-emerald-400 bg-emerald-950/50"
-                    : "text-rose-400 bg-rose-950/50"
+                    ? "text-emerald-600 dark:text-emerald-400 border-emerald-500/30 bg-emerald-500/10"
+                    : "text-rose-600 dark:text-rose-400 border-rose-500/30 bg-rose-500/10"
                 }`}
               >
                 {dcfOutput.upsideDownside >= 0 ? "+" : ""}
@@ -130,77 +144,84 @@ export default function ValuationLaboratoryPage() {
               </span>
             </div>
             <p className="text-xs text-[var(--text-secondary)] mt-2 leading-relaxed max-w-xl">
-              Outputs represent theoretical estimates derived from specified discount rates and reinvestment parameters. Subject to input sensitivity.
+              Model outputs reflect Gordon Growth discounting under user-specified cost of capital and reinvestment requirements.
             </p>
           </div>
 
-          {/* Quick Bridge Components */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs font-mono num-tabular shrink-0">
-            <div className="p-3 rounded-lg bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)]">
-              <span className="text-[10px] text-[var(--text-muted)] block">PV of 5Y FCF</span>
-              <span className="font-bold text-[var(--text-primary)]">${dcfOutput.sumPvFcf.toFixed(1)}B</span>
+          {/* Valuation Bridge Components */}
+          <div className="grid grid-cols-3 gap-3 text-xs font-mono num-tabular shrink-0">
+            <div className="p-3.5 border border-[var(--hairline)] bg-[var(--bg-surface-elevated)]/30 space-y-1">
+              <span className="text-[10px] text-[var(--text-muted)] uppercase block">PV of 5Y FCF</span>
+              <span className="font-bold text-[var(--text-primary)] text-sm">${dcfOutput.sumPvFcf.toFixed(1)}B</span>
             </div>
-            <div className="p-3 rounded-lg bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)]">
-              <span className="text-[10px] text-[var(--text-muted)] block">PV of Terminal Val</span>
-              <span className="font-bold text-[var(--text-primary)]">${dcfOutput.pvTerminalValue.toFixed(1)}B</span>
+            <div className="p-3.5 border border-[var(--hairline)] bg-[var(--bg-surface-elevated)]/30 space-y-1">
+              <span className="text-[10px] text-[var(--text-muted)] uppercase block">Terminal Val PV</span>
+              <span className="font-bold text-[var(--text-primary)] text-sm">${dcfOutput.pvTerminalValue.toFixed(1)}B</span>
             </div>
-            <div className="p-3 rounded-lg bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)]">
-              <span className="text-[10px] text-[var(--text-muted)] block">Enterprise Value</span>
-              <span className="font-bold text-emerald-400">${dcfOutput.enterpriseValue.toFixed(1)}B</span>
+            <div className="p-3.5 border border-[var(--hairline)] bg-[var(--bg-surface-elevated)]/30 space-y-1">
+              <span className="text-[10px] text-[var(--text-muted)] uppercase block">Enterprise Val</span>
+              <span className="font-bold text-[#365CFF] text-sm">${dcfOutput.enterpriseValue.toFixed(1)}B</span>
             </div>
           </div>
         </div>
 
-        {/* Scenario Switcher Chips */}
-        <div className="flex flex-wrap items-center gap-2 mt-6 pt-4 border-t border-[var(--border-subtle)]/70">
-          <span className="text-xs text-[var(--text-muted)] font-medium mr-1">Preset Scenarios:</span>
+        {/* Preset Scenarios Switcher */}
+        <div className="flex flex-wrap items-center gap-3 pt-2">
+          <span className="text-xs font-mono text-[var(--text-muted)] uppercase tracking-wider">
+            SCENARIO RUNWAY:
+          </span>
           <button
             onClick={() => handleApplyScenario("base")}
-            className={`px-3 py-1 rounded-md text-xs font-medium cursor-pointer border ${
+            className={`px-3 py-1 text-xs font-mono transition-colors cursor-pointer border ${
               activeScenario === "base"
-                ? "bg-emerald-950/50 text-emerald-300 border-emerald-700 font-semibold"
-                : "bg-[var(--bg-surface-elevated)] text-[var(--text-secondary)] border-[var(--border-subtle)]"
+                ? "bg-[#111210] dark:bg-[#F4F1E9] text-[#F4F1E9] dark:text-[#111210] border-transparent font-semibold"
+                : "bg-transparent text-[var(--text-secondary)] border-[var(--hairline)] hover:border-[#365CFF]"
             }`}
           >
             Consensus Base Case
           </button>
           <button
             onClick={() => handleApplyScenario("bull")}
-            className={`px-3 py-1 rounded-md text-xs font-medium cursor-pointer border ${
+            className={`px-3 py-1 text-xs font-mono transition-colors cursor-pointer border ${
               activeScenario === "bull"
-                ? "bg-emerald-950/50 text-emerald-300 border-emerald-700 font-semibold"
-                : "bg-[var(--bg-surface-elevated)] text-[var(--text-secondary)] border-[var(--border-subtle)]"
+                ? "bg-emerald-600 text-white border-transparent font-semibold"
+                : "bg-transparent text-[var(--text-secondary)] border-[var(--hairline)] hover:border-emerald-500"
             }`}
           >
-            Bull Case (Blackwell & Inference Surge)
+            Bull Case (Blackwell Surge)
           </button>
           <button
             onClick={() => handleApplyScenario("bear")}
-            className={`px-3 py-1 rounded-md text-xs font-medium cursor-pointer border ${
+            className={`px-3 py-1 text-xs font-mono transition-colors cursor-pointer border ${
               activeScenario === "bear"
-                ? "bg-rose-950/50 text-rose-300 border-rose-700 font-semibold"
-                : "bg-[var(--bg-surface-elevated)] text-[var(--text-secondary)] border-[var(--border-subtle)]"
+                ? "bg-rose-600 text-white border-transparent font-semibold"
+                : "bg-transparent text-[var(--text-secondary)] border-[var(--hairline)] hover:border-rose-500"
             }`}
           >
-            Bear Case (Hyperscale CapEx Digestion)
+            Bear Case (CapEx Digestion)
           </button>
         </div>
       </div>
 
-      {/* Main Grid: Interactive Controls on Left, Projection Table & Sensitivity on Right */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      {/* Main Grid: Inputs on Left, Projection Table & Sensitivity on Right */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Controls Column (1 span) */}
         <div className="space-y-6">
           <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm">Model Assumptions & Drivers</CardTitle>
+            <CardHeader className="border-b border-[var(--hairline)] pb-3">
+              <div className="text-[10px] font-mono uppercase tracking-wider text-[var(--text-muted)]">
+                PARAMETERS
+              </div>
+              <CardTitle className="font-serif text-lg font-normal mt-0.5">
+                Model Assumptions
+              </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4 text-xs">
+            <CardContent className="pt-4 space-y-5 text-xs">
               {/* WACC */}
               <div className="space-y-1.5">
-                <div className="flex justify-between">
+                <div className="flex justify-between font-mono">
                   <span className="text-[var(--text-secondary)]">WACC (Discount Rate):</span>
-                  <span className="font-mono font-bold text-emerald-400">{inputs.wacc.toFixed(1)}%</span>
+                  <span className="font-bold text-[#365CFF]">{inputs.wacc.toFixed(1)}%</span>
                 </div>
                 <input
                   type="range"
@@ -212,15 +233,15 @@ export default function ValuationLaboratoryPage() {
                     setActiveScenario("custom");
                     setInputs({ ...inputs, wacc: Number(e.target.value) });
                   }}
-                  className="w-full accent-emerald-500"
+                  className="w-full accent-[#365CFF] cursor-pointer"
                 />
               </div>
 
               {/* Terminal Growth */}
               <div className="space-y-1.5">
-                <div className="flex justify-between">
-                  <span className="text-[var(--text-secondary)]">Terminal Growth Rate (g):</span>
-                  <span className="font-mono font-bold text-emerald-400">{inputs.terminalGrowthRate.toFixed(1)}%</span>
+                <div className="flex justify-between font-mono">
+                  <span className="text-[var(--text-secondary)]">Terminal Growth (g):</span>
+                  <span className="font-bold text-[#365CFF]">{inputs.terminalGrowthRate.toFixed(1)}%</span>
                 </div>
                 <input
                   type="range"
@@ -232,15 +253,15 @@ export default function ValuationLaboratoryPage() {
                     setActiveScenario("custom");
                     setInputs({ ...inputs, terminalGrowthRate: Number(e.target.value) });
                   }}
-                  className="w-full accent-emerald-500"
+                  className="w-full accent-[#365CFF] cursor-pointer"
                 />
               </div>
 
               {/* Operating Margin */}
               <div className="space-y-1.5">
-                <div className="flex justify-between">
-                  <span className="text-[var(--text-secondary)]">Normalized Operating Margin:</span>
-                  <span className="font-mono font-bold text-[var(--text-primary)]">{inputs.operatingMargin}%</span>
+                <div className="flex justify-between font-mono">
+                  <span className="text-[var(--text-secondary)]">Normalized Margin:</span>
+                  <span className="font-bold text-[var(--text-primary)]">{inputs.operatingMargin}%</span>
                 </div>
                 <input
                   type="range"
@@ -252,15 +273,15 @@ export default function ValuationLaboratoryPage() {
                     setActiveScenario("custom");
                     setInputs({ ...inputs, operatingMargin: Number(e.target.value) });
                   }}
-                  className="w-full accent-emerald-500"
+                  className="w-full accent-[#365CFF] cursor-pointer"
                 />
               </div>
 
               {/* Reinvestment Rate */}
               <div className="space-y-1.5">
-                <div className="flex justify-between">
-                  <span className="text-[var(--text-secondary)]">Reinvestment Rate (% Rev):</span>
-                  <span className="font-mono font-bold text-[var(--text-primary)]">{inputs.reinvestmentRate}%</span>
+                <div className="flex justify-between font-mono">
+                  <span className="text-[var(--text-secondary)]">Reinvestment Rate:</span>
+                  <span className="font-bold text-[var(--text-primary)]">{inputs.reinvestmentRate}%</span>
                 </div>
                 <input
                   type="range"
@@ -272,17 +293,17 @@ export default function ValuationLaboratoryPage() {
                     setActiveScenario("custom");
                     setInputs({ ...inputs, reinvestmentRate: Number(e.target.value) });
                   }}
-                  className="w-full accent-emerald-500"
+                  className="w-full accent-[#365CFF] cursor-pointer"
                 />
               </div>
 
               {/* Revenue Growth Rates */}
-              <div className="pt-2 border-t border-[var(--border-subtle)] space-y-2">
-                <span className="font-semibold text-[var(--text-primary)] block">
-                  Projected Revenue Growth YoY:
+              <div className="pt-3 border-t border-[var(--hairline)] space-y-2.5">
+                <span className="font-mono text-[11px] font-bold text-[var(--text-primary)] uppercase tracking-wider block">
+                  Projected Revenue Growth YoY (%):
                 </span>
                 {inputs.revenueGrowthRates.map((g, idx) => (
-                  <div key={idx} className="flex items-center justify-between text-[11px] font-mono">
+                  <div key={idx} className="flex items-center justify-between text-xs font-mono">
                     <span className="text-[var(--text-muted)]">Year {idx + 1}:</span>
                     <input
                       type="number"
@@ -293,7 +314,7 @@ export default function ValuationLaboratoryPage() {
                         next[idx] = Number(e.target.value);
                         setInputs({ ...inputs, revenueGrowthRates: next });
                       }}
-                      className="w-16 p-1 rounded bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-right text-[var(--text-primary)]"
+                      className="w-16 p-1 border border-[var(--hairline)] bg-[var(--bg-surface-elevated)]/40 text-right text-[var(--text-primary)] focus:outline-none focus:border-[#365CFF]"
                     />
                   </div>
                 ))}
@@ -303,54 +324,59 @@ export default function ValuationLaboratoryPage() {
         </div>
 
         {/* Outputs Column (2 spans) */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="lg:col-span-2 space-y-8">
           {/* Projected Cash Flow Table */}
           <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm">5-Year Projected Cash Flow Breakdown ($B)</CardTitle>
+            <CardHeader className="border-b border-[var(--hairline)] pb-3">
+              <div className="text-[10px] font-mono uppercase tracking-wider text-[var(--text-muted)]">
+                SCHEDULE 3.1 · CASH FLOW PROJECTION
+              </div>
+              <CardTitle className="font-serif text-lg font-normal mt-0.5">
+                5-Year Projected Cash Flow Breakdown ($B)
+              </CardTitle>
             </CardHeader>
             <CardContent className="p-0">
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs border-collapse">
                   <thead>
-                    <tr className="border-b border-[var(--border-subtle)] bg-[var(--bg-surface-elevated)] text-[11px] text-[var(--text-muted)] font-medium">
-                      <th className="p-2.5 pl-4">Metric</th>
+                    <tr className="border-b border-[var(--hairline)] bg-[var(--bg-surface-elevated)]/40 text-[10px] font-mono text-[var(--text-muted)] uppercase tracking-wider">
+                      <th className="p-3.5 pl-5">Metric</th>
                       {[1, 2, 3, 4, 5].map((y) => (
-                        <th key={y} className="p-2.5 text-right font-mono">
+                        <th key={y} className="p-3.5 text-right font-mono">
                           Year {y}
                         </th>
                       ))}
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-[var(--border-subtle)]/40 num-tabular">
+                  <tbody className="divide-y divide-[var(--hairline)] num-tabular">
                     <tr>
-                      <td className="p-2.5 pl-4 text-[var(--text-secondary)]">Revenue ($B)</td>
+                      <td className="p-3.5 pl-5 text-[var(--text-secondary)]">Revenue ($B)</td>
                       {dcfOutput.projectedRevenues.map((r, i) => (
-                        <td key={i} className="p-2.5 text-right font-mono text-[var(--text-primary)]">
+                        <td key={i} className="p-3.5 text-right font-mono text-[var(--text-primary)]">
                           ${r.toFixed(1)}
                         </td>
                       ))}
                     </tr>
                     <tr>
-                      <td className="p-2.5 pl-4 text-[var(--text-secondary)]">Operating Income (EBIT)</td>
+                      <td className="p-3.5 pl-5 text-[var(--text-secondary)]">Operating Income (EBIT)</td>
                       {dcfOutput.projectedEbit.map((e, i) => (
-                        <td key={i} className="p-2.5 text-right font-mono text-[var(--text-primary)]">
+                        <td key={i} className="p-3.5 text-right font-mono text-[var(--text-primary)]">
                           ${e.toFixed(1)}
                         </td>
                       ))}
                     </tr>
                     <tr>
-                      <td className="p-2.5 pl-4 font-semibold text-[var(--text-primary)]">Free Cash Flow</td>
+                      <td className="p-3.5 pl-5 font-semibold text-[var(--text-primary)]">Free Cash Flow</td>
                       {dcfOutput.projectedFcf.map((f, i) => (
-                        <td key={i} className="p-2.5 text-right font-mono font-semibold text-emerald-400">
+                        <td key={i} className="p-3.5 text-right font-mono font-semibold text-emerald-600 dark:text-emerald-400">
                           ${f.toFixed(1)}
                         </td>
                       ))}
                     </tr>
                     <tr>
-                      <td className="p-2.5 pl-4 text-[var(--text-muted)] text-[11px]">PV Discounted FCF</td>
+                      <td className="p-3.5 pl-5 text-[var(--text-muted)] text-[11px]">PV Discounted FCF</td>
                       {dcfOutput.presentValueFcf.map((pv, i) => (
-                        <td key={i} className="p-2.5 text-right font-mono text-sky-400 text-[11px]">
+                        <td key={i} className="p-3.5 text-right font-mono text-[#365CFF] text-[11px]">
                           ${pv.toFixed(1)}
                         </td>
                       ))}
@@ -363,10 +389,15 @@ export default function ValuationLaboratoryPage() {
 
           {/* 2D Sensitivity Matrix */}
           <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm">2D Valuation Sensitivity Matrix</CardTitle>
+            <CardHeader className="border-b border-[var(--hairline)] pb-3">
+              <div className="text-[10px] font-mono uppercase tracking-wider text-[var(--text-muted)]">
+                FIGURE 3.2 · 2D STRESS TESTING
+              </div>
+              <CardTitle className="font-serif text-lg font-normal mt-0.5">
+                Valuation Sensitivity Matrix (WACC × Terminal Growth)
+              </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-4">
               <SensitivityHeatmap
                 matrix={dcfOutput.sensitivityMatrix}
                 currentPrice={currentSecurity.price}

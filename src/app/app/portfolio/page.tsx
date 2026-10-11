@@ -4,18 +4,9 @@ import React, { useState } from "react";
 import Link from "next/link";
 import {
   PieChart,
-  TrendingUp,
-  ShieldCheck,
-  AlertTriangle,
   Plus,
   Trash2,
   RotateCcw,
-  Sparkles,
-  Info,
-  DollarSign,
-  Layers,
-  ArrowRight,
-  ExternalLink,
 } from "lucide-react";
 import { useWorkspace } from "@/context/WorkspaceContext";
 import { PortfolioHolding } from "@/types";
@@ -25,9 +16,8 @@ import { Badge } from "@/components/ui/Badge";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
 import { MetricCard } from "@/components/ui/MetricCard";
 import { DataProvenanceBadge } from "@/components/ui/DataProvenanceBadge";
-import { AreaLineChart } from "@/components/charts/AreaLineChart";
 import { DrawdownChart } from "@/components/charts/DrawdownChart";
-import { formatCurrency, formatPercent } from "@/lib/utils";
+import { formatCurrency } from "@/lib/utils";
 
 export default function PortfolioIntelligencePage() {
   const {
@@ -86,53 +76,66 @@ export default function PortfolioIntelligencePage() {
   ];
 
   return (
-    <div className="space-y-6">
-      {/* Header & Controls */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
+    <div className="space-y-8">
+      {/* Editorial Header */}
+      <div className="border-b border-[var(--hairline)] pb-5">
+        <div className="flex flex-wrap items-center justify-between gap-3 text-[11px] font-mono text-[var(--text-muted)] tracking-wider uppercase mb-2">
           <div className="flex items-center gap-2">
-            <h1 className="text-xl font-bold tracking-tight text-[var(--text-primary)]">
-              Portfolio Intelligence & Risk
-            </h1>
+            <span className="w-1.5 h-1.5 rounded-full bg-[#365CFF]" />
+            <span>DISPATCH: RISK & CAPITAL ALLOCATION</span>
+            <span>·</span>
+            <span>PORTFOLIO LEDGER</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <span className="px-1.5 py-0.5 border border-[var(--hairline)] bg-[var(--bg-surface)] text-[10px]">
+              DAILY COVARIANCE RECOMPUTED
+            </span>
             <DataProvenanceBadge type="CALCULATED_METRIC" source="Risk Engine" />
           </div>
-          <p className="text-xs text-[var(--text-secondary)] mt-0.5">
-            Holdings allocation, factor exposures, risk decomposition, and cross-asset correlation.
-          </p>
         </div>
 
-        <div className="flex items-center gap-2">
-          {isEmpty ? (
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={resetPortfolioToSample}
-              className="text-xs gap-1"
-            >
-              <RotateCcw className="h-3.5 w-3.5" />
-              <span>Load Sample Holdings</span>
-            </Button>
-          ) : (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={clearPortfolioToEmpty}
-              className="text-xs text-[var(--text-muted)]"
-              title="Test empty portfolio experience"
-            >
-              <span>Test Empty State</span>
-            </Button>
-          )}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div>
+            <h1 className="font-serif text-2xl md:text-3xl lg:text-4xl font-normal text-[var(--text-primary)] tracking-tight">
+              Portfolio Intelligence & Risk
+            </h1>
+            <p className="text-xs text-[var(--text-secondary)] mt-1.5 max-w-2xl leading-relaxed">
+              Factor exposures, risk contribution decomposition, and pairwise cross-asset correlation analysis.
+            </p>
+          </div>
 
-          <Button
-            variant="primary"
-            size="sm"
-            onClick={() => setIsAddModalOpen(true)}
-            className="text-xs gap-1"
-          >
-            <Plus className="h-3.5 w-3.5" />
-            <span>Add Position</span>
-          </Button>
+          <div className="flex items-center gap-2">
+            {isEmpty ? (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={resetPortfolioToSample}
+                className="text-xs font-mono gap-1"
+              >
+                <RotateCcw className="h-3 w-3" />
+                <span>Load Sample</span>
+              </Button>
+            ) : (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={clearPortfolioToEmpty}
+                className="text-xs font-mono text-[var(--text-muted)]"
+              >
+                <span>Clear</span>
+              </Button>
+            )}
+
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={() => setIsAddModalOpen(true)}
+              className="text-xs font-mono gap-1"
+            >
+              <Plus className="h-3.5 w-3.5" />
+              <span>Add Position</span>
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -144,6 +147,7 @@ export default function PortfolioIntelligencePage() {
           change={isEmpty ? undefined : portfolio.dayChangePercent}
           subtext={isEmpty ? "Unallocated cash" : `+$${portfolio.dayChangeDollar.toLocaleString()} today`}
           provenance="CALCULATED_METRIC"
+          provenanceSource="Broker Ledger"
         />
 
         <MetricCard
@@ -151,6 +155,7 @@ export default function PortfolioIntelligencePage() {
           value={isEmpty ? "$0.00" : `+$${portfolio.totalUnrealizedPl.toLocaleString()}`}
           subtext={isEmpty ? "No active positions" : `+${portfolio.totalUnrealizedPlPercent.toFixed(1)}% total return`}
           provenance="CALCULATED_METRIC"
+          provenanceSource="Tax-Lot Engine"
         />
 
         <MetricCard
@@ -158,6 +163,7 @@ export default function PortfolioIntelligencePage() {
           value={isEmpty ? "—" : portfolio.sharpeRatio1Y.toFixed(2)}
           subtext={isEmpty ? "Need 10+ daily observations" : `Sortino: ${portfolio.sortinoRatio1Y.toFixed(2)} · Rf: 4.5%`}
           provenance="CALCULATED_METRIC"
+          provenanceSource="Daily Returns"
         />
 
         <MetricCard
@@ -165,24 +171,25 @@ export default function PortfolioIntelligencePage() {
           value={isEmpty ? "0.0%" : `-${portfolio.maxDrawdown1Y}%`}
           subtext={isEmpty ? "No volatility" : `Annualized Vol: ${portfolio.annualizedVol1Y}%`}
           provenance="CALCULATED_METRIC"
+          provenanceSource="Peak-to-Trough"
         />
       </div>
 
       {/* Empty State Banner if 0 holdings */}
       {isEmpty && (
-        <div className="p-8 rounded-xl bg-[var(--bg-surface)] border border-dashed border-[var(--border-strong)] text-center space-y-3">
-          <div className="h-10 w-10 rounded-full bg-emerald-950/50 border border-emerald-800/60 text-emerald-400 flex items-center justify-center mx-auto">
+        <div className="p-12 border border-dashed border-[var(--hairline)] bg-[var(--bg-surface)] text-center space-y-3">
+          <div className="h-10 w-10 border border-[var(--hairline)] bg-[var(--bg-surface-elevated)] text-[#365CFF] flex items-center justify-center mx-auto">
             <PieChart className="h-5 w-5" />
           </div>
-          <h3 className="text-base font-semibold text-[var(--text-primary)]">
+          <h3 className="font-serif text-lg font-normal text-[var(--text-primary)]">
             Portfolio is currently unallocated
           </h3>
-          <p className="text-xs text-[var(--text-secondary)] max-w-md mx-auto">
-            You have $100,000 in unallocated cash reserves. Add individual stock holdings or click below to restore sample institutional allocations.
+          <p className="text-xs text-[var(--text-secondary)] max-w-md mx-auto leading-relaxed">
+            You hold $100,000 in unallocated cash reserves. Add individual positions or restore the sample institutional book.
           </p>
           <div className="pt-2">
-            <Button variant="primary" size="sm" onClick={resetPortfolioToSample} className="text-xs">
-              Load Realistic Institutional Portfolio
+            <Button variant="primary" size="sm" onClick={resetPortfolioToSample} className="text-xs font-mono">
+              Load Institutional Portfolio
             </Button>
           </div>
         </div>
@@ -193,11 +200,16 @@ export default function PortfolioIntelligencePage() {
         <>
           {/* Holdings Table */}
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardHeader className="flex flex-row items-center justify-between border-b border-[var(--hairline)] pb-3">
               <div>
-                <CardTitle>Current Position Holdings</CardTitle>
-                <p className="text-xs text-[var(--text-muted)] mt-0.5">
-                  Weights recalculated continuously based on live mark-to-market valuations
+                <div className="text-[10px] font-mono uppercase tracking-wider text-[var(--text-muted)]">
+                  SCHEDULE 5.1 · POSITION VALUATION
+                </div>
+                <CardTitle className="font-serif text-lg font-normal mt-0.5">
+                  Current Position Holdings
+                </CardTitle>
+                <p className="text-xs text-[var(--text-secondary)] mt-0.5">
+                  Weights recalculated continuously based on live mark-to-market prices
                 </p>
               </div>
               <Badge variant="provenance">{portfolio.holdings.length} Positions</Badge>
@@ -206,68 +218,68 @@ export default function PortfolioIntelligencePage() {
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs border-collapse">
                   <thead>
-                    <tr className="border-b border-[var(--border-subtle)] bg-[var(--bg-surface-elevated)] text-[11px] text-[var(--text-muted)] font-medium">
-                      <th className="p-3 pl-4">Security</th>
-                      <th className="p-3">Sector</th>
-                      <th className="p-3 text-right">Shares</th>
-                      <th className="p-3 text-right">Avg Cost</th>
-                      <th className="p-3 text-right">Market Price</th>
-                      <th className="p-3 text-right">Position Value</th>
-                      <th className="p-3 text-right">Weight</th>
-                      <th className="p-3 text-right">Risk %</th>
-                      <th className="p-3 text-right">Unrealized P&L</th>
-                      <th className="p-3 text-center pr-4">Action</th>
+                    <tr className="border-b border-[var(--hairline)] bg-[var(--bg-surface-elevated)]/40 text-[10px] font-mono text-[var(--text-muted)] uppercase tracking-wider">
+                      <th className="p-3.5 pl-5">Security</th>
+                      <th className="p-3.5">Sector</th>
+                      <th className="p-3.5 text-right">Shares</th>
+                      <th className="p-3.5 text-right">Avg Cost</th>
+                      <th className="p-3.5 text-right">Price</th>
+                      <th className="p-3.5 text-right">Position Value</th>
+                      <th className="p-3.5 text-right">Weight</th>
+                      <th className="p-3.5 text-right">Risk %</th>
+                      <th className="p-3.5 text-right">Unrealized P&L</th>
+                      <th className="p-3.5 text-center pr-5">Action</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-[var(--border-subtle)]/40 num-tabular">
+                  <tbody className="divide-y divide-[var(--hairline)] num-tabular">
                     {portfolio.holdings.map((h) => (
-                      <tr key={h.ticker} className="hover:bg-[var(--bg-surface-elevated)]/40">
-                        <td className="p-3 pl-4">
+                      <tr key={h.ticker} className="hover:bg-[var(--bg-surface-elevated)]/40 transition-colors">
+                        <td className="p-3.5 pl-5">
                           <Link
                             href={`/app/research?ticker=${h.ticker}`}
                             onClick={() => setActiveResearchTicker(h.ticker)}
-                            className="font-mono font-bold text-[var(--text-primary)] hover:text-emerald-400"
+                            className="font-mono font-bold text-[var(--text-primary)] hover:text-[#365CFF]"
                           >
                             {h.ticker}
                           </Link>
-                          <div className="text-[10px] text-[var(--text-muted)] truncate max-w-[130px]">
+                          <div className="text-[10px] text-[var(--text-secondary)] truncate max-w-[130px]">
                             {h.name}
                           </div>
                         </td>
-                        <td className="p-3 text-[var(--text-secondary)] text-[11px]">
+                        <td className="p-3.5 text-[var(--text-secondary)] text-[11px]">
                           {h.sector}
                         </td>
-                        <td className="p-3 text-right font-mono text-[var(--text-primary)]">
+                        <td className="p-3.5 text-right font-mono text-[var(--text-primary)]">
                           {h.shares.toLocaleString()}
                         </td>
-                        <td className="p-3 text-right font-mono text-[var(--text-secondary)]">
+                        <td className="p-3.5 text-right font-mono text-[var(--text-secondary)]">
                           {formatCurrency(h.costBasis)}
                         </td>
-                        <td className="p-3 text-right font-mono font-semibold text-[var(--text-primary)]">
+                        <td className="p-3.5 text-right font-mono font-semibold text-[var(--text-primary)]">
                           {formatCurrency(h.currentPrice)}
                         </td>
-                        <td className="p-3 text-right font-mono font-semibold text-[var(--text-primary)]">
+                        <td className="p-3.5 text-right font-mono font-semibold text-[var(--text-primary)]">
                           {formatCurrency(h.currentValue, "$", 0)}
                         </td>
-                        <td className="p-3 text-right font-mono font-bold text-emerald-400">
+                        <td className="p-3.5 text-right font-mono font-bold text-emerald-600 dark:text-emerald-400">
                           {h.weight}%
                         </td>
-                        <td className="p-3 text-right font-mono text-purple-400">
+                        <td className="p-3.5 text-right font-mono text-[#365CFF]">
                           {h.riskContribution}%
                         </td>
-                        <td className="p-3 text-right">
-                          <div className="font-mono font-semibold text-emerald-400">
+                        <td className="p-3.5 text-right">
+                          <div className="font-mono font-semibold text-emerald-600 dark:text-emerald-400">
                             +{formatCurrency(h.unrealizedPl, "$", 0)}
                           </div>
-                          <div className="text-[10px] font-mono text-emerald-400">
+                          <div className="text-[10px] font-mono text-emerald-600 dark:text-emerald-400">
                             +{h.unrealizedPlPercent.toFixed(1)}%
                           </div>
                         </td>
-                        <td className="p-3 text-center pr-4">
+                        <td className="p-3.5 text-center pr-5">
                           <button
                             onClick={() => removeHolding(h.ticker)}
-                            className="p-1 rounded text-[var(--text-muted)] hover:text-rose-400 hover:bg-rose-950/40 cursor-pointer transition-colors"
-                            title="Sell / Remove holding"
+                            className="p-1 border border-transparent hover:border-rose-500/40 text-[var(--text-muted)] hover:text-rose-500 cursor-pointer transition-colors"
+                            title="Remove position"
                           >
                             <Trash2 className="h-3.5 w-3.5" />
                           </button>
@@ -281,43 +293,53 @@ export default function PortfolioIntelligencePage() {
           </Card>
 
           {/* Allocation & Risk Decomposition Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Sector Allocation Breakdown */}
             <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm">Sector Allocation Breakdown</CardTitle>
+              <CardHeader className="border-b border-[var(--hairline)] pb-3">
+                <div className="text-[10px] font-mono uppercase tracking-wider text-[var(--text-muted)]">
+                  FIGURE 5.2 · SECTOR EXPOSURE
+                </div>
+                <CardTitle className="font-serif text-lg font-normal mt-0.5">
+                  Sector Allocation Breakdown
+                </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-3 text-xs">
+              <CardContent className="pt-4 space-y-4 text-xs">
                 {portfolio.sectorAllocations.map((sec) => (
-                  <div key={sec.sector} className="space-y-1">
-                    <div className="flex justify-between text-xs font-medium">
+                  <div key={sec.sector} className="space-y-1.5">
+                    <div className="flex justify-between text-xs">
                       <span className="text-[var(--text-primary)]">{sec.sector}</span>
-                      <span className="font-mono text-emerald-400 font-semibold num-tabular">
+                      <span className="font-mono text-emerald-600 dark:text-emerald-400 font-semibold num-tabular">
                         {sec.weight}%
                       </span>
                     </div>
-                    <div className="w-full h-1.5 rounded-full bg-[var(--bg-surface-elevated)] overflow-hidden">
+                    <div className="w-full h-1 bg-[var(--bg-surface-elevated)] border border-[var(--hairline)] overflow-hidden">
                       <div
-                        className="h-full bg-emerald-500 rounded-full transition-all"
+                        className="h-full bg-[#365CFF] transition-all"
                         style={{ width: `${sec.weight}%` }}
                       />
                     </div>
                   </div>
                 ))}
 
-                <div className="pt-3 border-t border-[var(--border-subtle)] text-[11px] text-[var(--text-muted)] flex items-center justify-between">
-                  <span>HHI Concentration Index: <strong>1,842</strong></span>
-                  <span className="text-amber-400">Moderately Concentrated</span>
+                <div className="pt-4 border-t border-[var(--hairline)] text-[11px] font-mono text-[var(--text-muted)] flex items-center justify-between">
+                  <span>HHI CONCENTRATION: <strong>1,842</strong></span>
+                  <span className="text-amber-600 dark:text-amber-400">MODERATELY CONCENTRATED</span>
                 </div>
               </CardContent>
             </Card>
 
             {/* Historical Drawdown Profile */}
             <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm">Portfolio Drawdown Risk</CardTitle>
+              <CardHeader className="border-b border-[var(--hairline)] pb-3">
+                <div className="text-[10px] font-mono uppercase tracking-wider text-[var(--text-muted)]">
+                  FIGURE 5.3 · PEAK-TO-TROUGH STRESS
+                </div>
+                <CardTitle className="font-serif text-lg font-normal mt-0.5">
+                  Portfolio Drawdown Profile
+                </CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="pt-4">
                 <DrawdownChart
                   data={[
                     { date: "2024-01", drawdown: 0 },
@@ -333,7 +355,7 @@ export default function PortfolioIntelligencePage() {
                     { date: "2025-12", drawdown: 0 },
                     { date: "2026-03", drawdown: 0 },
                   ]}
-                  height={150}
+                  height={170}
                 />
               </CardContent>
             </Card>
@@ -341,12 +363,17 @@ export default function PortfolioIntelligencePage() {
 
           {/* Holdings Correlation Matrix */}
           <Card>
-            <CardHeader className="pb-2">
+            <CardHeader className="border-b border-[var(--hairline)] pb-3">
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle className="text-sm">Cross-Asset Correlation Structure</CardTitle>
-                  <p className="text-xs text-[var(--text-muted)] mt-0.5">
-                    Pairwise return correlations over 252 trading days (-1.0 to +1.0)
+                  <div className="text-[10px] font-mono uppercase tracking-wider text-[var(--text-muted)]">
+                    SCHEDULE 5.4 · RETURN COVARIANCE
+                  </div>
+                  <CardTitle className="font-serif text-lg font-normal mt-0.5">
+                    Cross-Asset Correlation Structure
+                  </CardTitle>
+                  <p className="text-xs text-[var(--text-secondary)] mt-0.5">
+                    Pairwise daily return correlations over 252 trading sessions (-1.0 to +1.0)
                   </p>
                 </div>
                 <DataProvenanceBadge type="CALCULATED_METRIC" source="Covariance Matrix" />
@@ -356,30 +383,30 @@ export default function PortfolioIntelligencePage() {
               <div className="overflow-x-auto">
                 <table className="w-full text-center text-xs border-collapse num-tabular">
                   <thead>
-                    <tr className="border-b border-[var(--border-subtle)] bg-[var(--bg-surface-elevated)] text-[11px] text-[var(--text-muted)] font-semibold">
-                      <th className="p-2.5 text-left pl-4">Asset</th>
+                    <tr className="border-b border-[var(--hairline)] bg-[var(--bg-surface-elevated)]/40 text-[10px] font-mono text-[var(--text-muted)] uppercase tracking-wider">
+                      <th className="p-3 text-left pl-5">Asset</th>
                       {correlationMatrix.map((c) => (
-                        <th key={c.ticker} className="p-2.5 font-mono">
+                        <th key={c.ticker} className="p-3 font-mono">
                           {c.ticker}
                         </th>
                       ))}
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-[var(--border-subtle)]/40">
+                  <tbody className="divide-y divide-[var(--hairline)]">
                     {correlationMatrix.map((row) => (
                       <tr key={row.ticker}>
-                        <td className="p-2.5 text-left pl-4 font-mono font-bold text-[var(--text-primary)]">
+                        <td className="p-3 text-left pl-5 font-mono font-bold text-[var(--text-primary)]">
                           {row.ticker}
                         </td>
                         {correlationMatrix.map((col) => {
-                          const val = (row as any)[col.ticker] as number;
-                          let bg = "bg-transparent";
-                          if (val === 1.0) bg = "bg-slate-800/20 text-[var(--text-muted)]";
-                          else if (val >= 0.7) bg = "bg-rose-950/40 text-rose-300 font-semibold";
-                          else if (val <= 0.3) bg = "bg-emerald-950/40 text-emerald-300 font-semibold";
+                          const val = (row as Record<string, number | string>)[col.ticker] as number;
+                          let colorCls = "text-[var(--text-secondary)]";
+                          if (val === 1.0) colorCls = "text-[var(--text-muted)] font-mono";
+                          else if (val >= 0.7) colorCls = "text-rose-600 dark:text-rose-400 font-semibold";
+                          else if (val <= 0.3) colorCls = "text-emerald-600 dark:text-emerald-400 font-semibold";
 
                           return (
-                            <td key={col.ticker} className={`p-2.5 font-mono ${bg}`}>
+                            <td key={col.ticker} className={`p-3 font-mono border-l border-[var(--hairline)] ${colorCls}`}>
                               {val.toFixed(2)}
                             </td>
                           );
@@ -397,17 +424,19 @@ export default function PortfolioIntelligencePage() {
       {/* Add Holding Modal */}
       {isAddModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-xs">
-          <div className="w-full max-w-md bg-[var(--bg-surface)] border border-[var(--border-strong)] rounded-xl shadow-2xl p-6">
-            <h3 className="text-base font-bold text-[var(--text-primary)] mb-1">
+          <div className="w-full max-w-md bg-[var(--bg-surface)] border border-[var(--hairline)] p-6 space-y-4">
+            <h3 className="font-serif text-xl font-normal text-[var(--text-primary)]">
               Add Portfolio Position
             </h3>
-            <p className="text-xs text-[var(--text-muted)] mb-4">
-              Enter trade details to add a new security holding.
+            <p className="text-xs text-[var(--text-secondary)]">
+              Specify trade execution details to add an equity position to the active fund ledger.
             </p>
 
             <form onSubmit={handleAddHolding} className="space-y-4 text-xs">
               <div>
-                <label className="block text-[var(--text-secondary)] mb-1">Security Ticker</label>
+                <label className="block font-mono text-[10px] uppercase text-[var(--text-muted)] mb-1">
+                  Security Ticker
+                </label>
                 <select
                   value={newTicker}
                   onChange={(e) => {
@@ -415,7 +444,7 @@ export default function PortfolioIntelligencePage() {
                     const sec = MOCK_SECURITIES.find((s) => s.ticker === e.target.value);
                     if (sec) setNewCostBasis(sec.price.toString());
                   }}
-                  className="w-full h-9 px-3 rounded-md bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-[var(--text-primary)]"
+                  className="w-full h-9 px-3 border border-[var(--hairline)] bg-[var(--bg-surface-elevated)]/40 text-[var(--text-primary)] font-mono text-xs"
                 >
                   {MOCK_SECURITIES.map((s) => (
                     <option key={s.ticker} value={s.ticker}>
@@ -426,36 +455,41 @@ export default function PortfolioIntelligencePage() {
               </div>
 
               <div>
-                <label className="block text-[var(--text-secondary)] mb-1">Quantity of Shares</label>
+                <label className="block font-mono text-[10px] uppercase text-[var(--text-muted)] mb-1">
+                  Quantity of Shares
+                </label>
                 <input
                   type="number"
                   value={newShares}
                   onChange={(e) => setNewShares(e.target.value)}
-                  className="w-full h-9 px-3 rounded-md bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-[var(--text-primary)]"
+                  className="w-full h-9 px-3 border border-[var(--hairline)] bg-[var(--bg-surface-elevated)]/40 text-[var(--text-primary)] font-mono text-xs"
                 />
               </div>
 
               <div>
-                <label className="block text-[var(--text-secondary)] mb-1">Cost Basis Price ($/share)</label>
+                <label className="block font-mono text-[10px] uppercase text-[var(--text-muted)] mb-1">
+                  Cost Basis Price ($/share)
+                </label>
                 <input
                   type="number"
                   step="0.01"
                   value={newCostBasis}
                   onChange={(e) => setNewCostBasis(e.target.value)}
-                  className="w-full h-9 px-3 rounded-md bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-[var(--text-primary)]"
+                  className="w-full h-9 px-3 border border-[var(--hairline)] bg-[var(--bg-surface-elevated)]/40 text-[var(--text-primary)] font-mono text-xs"
                 />
               </div>
 
-              <div className="flex items-center justify-end gap-2 pt-3 border-t border-[var(--border-subtle)]">
+              <div className="flex items-center justify-end gap-2 pt-3 border-t border-[var(--hairline)]">
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
                   onClick={() => setIsAddModalOpen(false)}
+                  className="font-mono text-xs"
                 >
                   Cancel
                 </Button>
-                <Button type="submit" variant="primary" size="sm">
+                <Button type="submit" variant="primary" size="sm" className="font-mono text-xs">
                   Add to Portfolio
                 </Button>
               </div>

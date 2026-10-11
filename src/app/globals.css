@@ -2,61 +2,106 @@
 
 @layer base {
   :root {
-    --bg-base: #08090D;
-    --bg-surface: #0E1118;
-    --bg-surface-elevated: #151924;
-    --bg-surface-hover: #1C2232;
-    --border-subtle: #1E2333;
-    --border-strong: #2D354D;
-    --text-primary: #F3F4F6;
-    --text-secondary: #94A3B8;
-    --text-muted: #64748B;
-    --accent-primary: #10B981;
-    --accent-teal: #06B6D4;
-    --accent-blue: #3B82F6;
-    --positive: #10B981;
-    --negative: #F43F5E;
-    --warning: #F59E0B;
+    /* Swiss Editorial Palette */
+    --paper-base: #F4F1E9;
+    --paper-surface: #FAF8F3;
+    --paper-elevated: #EDEAE1;
+    --paper-hover: #E4E0D5;
+    
+    --ink-base: #111210;
+    --ink-surface: #181916;
+    --ink-elevated: #21231F;
+    --ink-hover: #2B2E29;
+
+    --hairline: #D9D6CD;
+    --hairline-dark: #2A2D27;
+    
+    --cobalt: #365CFF;
+    --cobalt-dark: #2649E6;
+    --cobalt-subtle: #EDF1FF;
+    --signal-lime: #D8F36A;
+    --signal-lime-dark: #2C350D;
+    --stone-muted: #7E8079;
+    --stone-light: #A3A69C;
+
+    /* Semantic values */
+    --text-ink-primary: #121311;
+    --text-ink-secondary: #585A52;
+    --text-ink-muted: #878A81;
+
+    --text-paper-primary: #F4F1E9;
+    --text-paper-secondary: #B4B6AC;
+    --text-paper-muted: #74776D;
+
+    --semantic-positive: #16864A;
+    --semantic-positive-dark: #22C55E;
+    --semantic-negative: #CF2A2C;
+    --semantic-negative-dark: #EF4444;
+    --semantic-warning: #B45309;
+    --semantic-warning-dark: #F59E0B;
+
+    /* Active canvas default: hybrid editorial with selective dark canvases */
+    --bg-base: var(--paper-base);
+    --bg-surface: var(--paper-surface);
+    --bg-surface-elevated: var(--paper-elevated);
+    --border-subtle: var(--hairline);
+    --border-strong: #BFBCB2;
+    --text-primary: var(--text-ink-primary);
+    --text-secondary: var(--text-ink-secondary);
+    --text-muted: var(--text-ink-muted);
   }
 
-  .light {
-    --bg-base: #F8FAFC;
-    --bg-surface: #FFFFFF;
-    --bg-surface-elevated: #F1F5F9;
-    --bg-surface-hover: #E2E8F0;
-    --border-subtle: #E2E8F0;
-    --border-strong: #CBD5E1;
-    --text-primary: #0F172A;
-    --text-secondary: #475569;
-    --text-muted: #64748B;
-    --accent-primary: #059669;
-    --accent-teal: #0891B2;
-    --accent-blue: #2563EB;
-    --positive: #059669;
-    --negative: #E11D48;
-    --warning: #D97706;
+  .theme-ink {
+    --bg-base: var(--ink-base);
+    --bg-surface: var(--ink-surface);
+    --bg-surface-elevated: var(--ink-elevated);
+    --border-subtle: var(--hairline-dark);
+    --border-strong: #3D4039;
+    --text-primary: var(--text-paper-primary);
+    --text-secondary: var(--text-paper-secondary);
+    --text-muted: var(--text-paper-muted);
   }
 }
 
 body {
   background-color: var(--bg-base);
   color: var(--text-primary);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-family: var(--font-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   min-height: 100vh;
 }
 
-/* Tabular numbers for financial precision */
-.num-tabular {
-  font-variant-numeric: tabular-nums;
-  letter-spacing: -0.01em;
+.font-editorial {
+  font-family: var(--font-serif), Newsreader, Georgia, serif;
 }
 
-/* Custom refined scrollbars */
+.font-mono-numbers {
+  font-family: var(--font-mono), "JetBrains Mono", monospace;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+/* Hairline border utilities */
+.border-hairline {
+  border-color: var(--border-subtle);
+}
+
+.divide-hairline > * + * {
+  border-color: var(--border-subtle);
+}
+
+/* Tabular numbers for financial precision */
+.num-tabular {
+  font-family: var(--font-mono), "JetBrains Mono", monospace;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.015em;
+}
+
+/* Custom scrollbars */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 
 ::-webkit-scrollbar-track {
@@ -64,16 +109,9 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--border-strong);
-  border-radius: 3px;
+  background: var(--border-subtle);
 }
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--text-muted);
-}
-
-/* Selection */
-::selection {
-  background-color: #06B6D4;
-  color: #08090D;
 }

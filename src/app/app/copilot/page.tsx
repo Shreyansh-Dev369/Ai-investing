@@ -1,26 +1,16 @@
 "use client";
 
 import React, { useState } from "react";
-import Link from "next/link";
 import {
-  MessageSquareCode,
   Send,
   Sparkles,
-  ShieldCheck,
   FileText,
-  AlertTriangle,
   RotateCcw,
-  CheckCircle2,
-  PieChart,
-  HelpCircle,
-  ExternalLink,
 } from "lucide-react";
 import { useWorkspace } from "@/context/WorkspaceContext";
 import { Button } from "@/components/ui/Button";
-import { Badge } from "@/components/ui/Badge";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
+import { Card, CardContent } from "@/components/ui/Card";
 import { DataProvenanceBadge } from "@/components/ui/DataProvenanceBadge";
-import { formatCurrency, formatPercent } from "@/lib/utils";
 
 interface ChatMessage {
   id: string;
@@ -87,7 +77,7 @@ export default function ResearchCopilotPage() {
         provenance = "CALCULATED_METRIC";
       } else if (q.includes("asml") || q.includes("invalidate") || q.includes("tripwire")) {
         const asmlThesis = theses.find((t) => t.ticker === "ASML");
-        replyContent = `The primary invalidating condition for your ASML thesis is that **quarterly net bookings remain below €5.0B for two consecutive periods** or export restrictions extend to mid-critical DUV immersion tools. \n\n**Current Status:** AMBER WATCH. ASML reported Q2 bookings of €3.9B (variance of -22.0% vs your original assumption). Management attributed this to non-AI logic fab project deferrals. High-NA tool deliveries remain on schedule.`;
+        replyContent = `The primary invalidating condition for your ASML thesis is that **quarterly net bookings remain below €5.0B for two consecutive periods** or export restrictions extend to mid-critical DUV immersion tools. \n\n**Current Status:** ${asmlThesis?.status || "WATCH"}. ASML reported Q2 bookings of €3.9B (variance of -22.0% vs your original assumption). Management attributed this to non-AI logic fab project deferrals. High-NA tool deliveries remain on schedule.`;
         citations = [
           { title: "ASML Q2 Interim Financial Report", docType: "SEC Form 6-K", date: "Oct 2026" },
           { title: "Thesis Tripwire Register #thesis-asml", docType: "Active Monitor", date: "Live" },
@@ -123,51 +113,67 @@ export default function ResearchCopilotPage() {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
+    <div className="space-y-8">
+      {/* Editorial Header */}
+      <div className="border-b border-[var(--hairline)] pb-5">
+        <div className="flex flex-wrap items-center justify-between gap-3 text-[11px] font-mono text-[var(--text-muted)] tracking-wider uppercase mb-2">
           <div className="flex items-center gap-2">
-            <h1 className="text-xl font-bold tracking-tight text-[var(--text-primary)]">
-              Natural Language Research Copilot
-            </h1>
+            <span className="w-1.5 h-1.5 rounded-full bg-[#365CFF]" />
+            <span>DISPATCH: RESEARCH COPILOT</span>
+            <span>·</span>
+            <span>GROUNDED CONTEXTUAL INTELLIGENCE</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <span className="px-1.5 py-0.5 border border-[var(--hairline)] bg-[var(--bg-surface)] text-[10px]">
+              GROUNDED IN ACTIVE HOLDINGS
+            </span>
             <DataProvenanceBadge type="MODEL_ESTIMATE" source="Contextual Intelligence Engine" />
           </div>
-          <p className="text-xs text-[var(--text-secondary)] mt-0.5">
-            Contextual research assistant grounded in your active holdings, thesis tripwires, and SEC filing data.
-          </p>
         </div>
 
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() =>
-            setMessages([
-              {
-                id: "msg-1",
-                role: "assistant",
-                content:
-                  "Conversation reset. What investment research question can I assist you with?",
-                timestamp: "Just now",
-                provenance: "CALCULATED_METRIC",
-              },
-            ])
-          }
-          className="text-xs gap-1"
-        >
-          <RotateCcw className="h-3.5 w-3.5" />
-          <span>Clear Chat</span>
-        </Button>
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div>
+            <h1 className="font-serif text-2xl md:text-3xl lg:text-4xl font-normal text-[var(--text-primary)] tracking-tight">
+              Natural Language Research Copilot
+            </h1>
+            <p className="text-xs text-[var(--text-secondary)] mt-1.5 max-w-2xl leading-relaxed">
+              Investigative partner grounded in your active fund holdings, quantitative models, and audited SEC EDGAR regulatory filings.
+            </p>
+          </div>
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() =>
+              setMessages([
+                {
+                  id: "msg-1",
+                  role: "assistant",
+                  content:
+                    "Conversation reset. What investment research question can I assist you with?",
+                  timestamp: "Just now",
+                  provenance: "CALCULATED_METRIC",
+                },
+              ])
+            }
+            className="text-xs font-mono gap-1"
+          >
+            <RotateCcw className="h-3 w-3" />
+            <span>Clear History</span>
+          </Button>
+        </div>
       </div>
 
       {/* Suggested Prompt Chips */}
       <div className="flex flex-wrap items-center gap-2">
-        <span className="text-xs text-[var(--text-muted)] font-medium mr-1">Suggested:</span>
+        <span className="text-xs font-mono text-[var(--text-muted)] uppercase tracking-wider mr-1">
+          SUGGESTED INQUIRIES:
+        </span>
         {suggestedQueries.map((sq, i) => (
           <button
             key={i}
             onClick={() => handleSendQuery(sq)}
-            className="px-2.5 py-1 rounded-md bg-[var(--bg-surface)] hover:bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-[11px] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer text-left"
+            className="px-3 py-1.5 border border-[var(--hairline)] bg-[var(--bg-surface)] hover:border-[#365CFF] hover:text-[#365CFF] text-[11px] text-[var(--text-secondary)] transition-colors cursor-pointer text-left"
           >
             {sq}
           </button>
@@ -175,8 +181,8 @@ export default function ResearchCopilotPage() {
       </div>
 
       {/* Chat Conversation Viewport */}
-      <Card className="min-h-[480px] flex flex-col justify-between">
-        <CardContent className="p-4 sm:p-6 space-y-4 flex-1 overflow-y-auto max-h-[540px]">
+      <Card className="min-h-[500px] flex flex-col justify-between">
+        <CardContent className="p-4 sm:p-6 space-y-5 flex-1 overflow-y-auto max-h-[560px]">
           {messages.map((m) => {
             const isUser = m.role === "user";
             return (
@@ -185,22 +191,22 @@ export default function ResearchCopilotPage() {
                 className={`flex gap-3 text-xs ${isUser ? "justify-end" : "justify-start"}`}
               >
                 {!isUser && (
-                  <div className="h-7 w-7 rounded-md bg-emerald-600/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 shrink-0 font-bold">
+                  <div className="h-7 w-7 border border-[#365CFF]/30 bg-[#365CFF]/10 flex items-center justify-center text-[#365CFF] shrink-0 font-bold">
                     <Sparkles className="h-3.5 w-3.5" />
                   </div>
                 )}
 
                 <div
-                  className={`max-w-2xl p-4 rounded-xl leading-relaxed space-y-3 ${
+                  className={`max-w-2xl p-4 leading-relaxed space-y-3 ${
                     isUser
-                      ? "bg-emerald-950/60 text-emerald-100 border border-emerald-800/60"
-                      : "bg-[var(--bg-surface-elevated)] text-[var(--text-primary)] border border-[var(--border-subtle)]"
+                      ? "bg-[#111210] dark:bg-[#F4F1E9] text-[#F4F1E9] dark:text-[#111210] border border-transparent font-sans"
+                      : "bg-[var(--bg-surface)] text-[var(--text-primary)] border border-[var(--hairline)]"
                   }`}
                 >
                   <div className="whitespace-pre-line text-xs">{m.content}</div>
 
                   {!isUser && m.citations && m.citations.length > 0 && (
-                    <div className="pt-2 border-t border-[var(--border-subtle)]/70 space-y-1">
+                    <div className="pt-2.5 border-t border-[var(--hairline)] space-y-1.5">
                       <div className="text-[10px] font-mono text-[var(--text-muted)] uppercase tracking-wider">
                         Verified Sources & Citations:
                       </div>
@@ -208,9 +214,9 @@ export default function ResearchCopilotPage() {
                         {m.citations.map((c, idx) => (
                           <span
                             key={idx}
-                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-[10px] text-[var(--text-secondary)]"
+                            className="inline-flex items-center gap-1 px-2 py-0.5 border border-[var(--hairline)] bg-[var(--bg-surface-elevated)]/40 text-[10px] font-mono text-[var(--text-secondary)]"
                           >
-                            <FileText className="h-2.5 w-2.5 text-emerald-400" />
+                            <FileText className="h-2.5 w-2.5 text-[#365CFF]" />
                             <span>{c.title} ({c.date})</span>
                           </span>
                         ))}
@@ -230,15 +236,15 @@ export default function ResearchCopilotPage() {
           })}
 
           {isTyping && (
-            <div className="flex items-center gap-2 text-xs text-[var(--text-muted)] p-2">
-              <span className="h-2 w-2 rounded-full bg-emerald-400 animate-ping" />
-              <span>Contextual Intelligence Engine synthesizing filings and portfolio metrics...</span>
+            <div className="flex items-center gap-2 text-xs font-mono text-[var(--text-muted)] p-2">
+              <span className="h-2 w-2 rounded-full bg-[#365CFF] animate-ping" />
+              <span>Synthesizing SEC filings and live portfolio matrix...</span>
             </div>
           )}
         </CardContent>
 
         {/* Input Bar */}
-        <div className="p-4 border-t border-[var(--border-subtle)] bg-[var(--bg-surface-elevated)]/30">
+        <div className="p-4 border-t border-[var(--hairline)] bg-[var(--bg-surface-elevated)]/30">
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -251,15 +257,15 @@ export default function ResearchCopilotPage() {
               placeholder="Ask an investment research question grounded in your portfolio and models..."
               value={inputQuery}
               onChange={(e) => setInputQuery(e.target.value)}
-              className="flex-1 h-10 px-3.5 rounded-lg bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-xs text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-emerald-500"
+              className="flex-1 h-10 px-4 border border-[var(--hairline)] bg-[var(--bg-surface)] text-xs text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[#365CFF]"
             />
-            <Button type="submit" variant="primary" size="md" className="gap-1.5 text-xs">
-              <span>Ask Copilot</span>
-              <Send className="h-3.5 w-3.5" />
+            <Button type="submit" variant="primary" size="md" className="gap-1.5 text-xs font-mono">
+              <span>Send</span>
+              <Send className="h-3 w-3" />
             </Button>
           </form>
-          <div className="text-[10px] text-[var(--text-muted)] mt-2 text-center">
-            Responses reference verifiable application context. Disclaimers: Estimates do not constitute investment advice.
+          <div className="text-[10px] font-mono text-[var(--text-muted)] mt-2 text-center">
+            Responses reference verifiable application context. Not registered financial advice.
           </div>
         </div>
       </Card>

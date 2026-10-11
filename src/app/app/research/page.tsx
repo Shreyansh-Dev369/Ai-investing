@@ -46,7 +46,7 @@ function SecurityResearchContent() {
   const currentSecurity =
     MOCK_SECURITIES.find((s) => s.ticker === activeResearchTicker) || MOCK_SECURITIES[0];
 
-  const detail = MOCK_RESEARCH_NVDA; // In demo mode, rich deep-dive data is loaded for core security
+  const detail = MOCK_RESEARCH_NVDA;
   const isSavedToWatchlist = watchlist.includes(currentSecurity.ticker);
 
   const handleSaveNotes = () => {
@@ -57,65 +57,34 @@ function SecurityResearchContent() {
   const tickersList = ["NVDA", "MSFT", "ASML", "LLY", "TSM", "GOOGL"];
 
   return (
-    <div className="space-y-6">
-      {/* Ticker Selector Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-4 p-3 rounded-lg bg-[var(--bg-surface)] border border-[var(--border-subtle)]">
-        <div className="flex items-center gap-2 overflow-x-auto">
-          <span className="text-xs text-[var(--text-muted)] font-medium mr-1">Securities:</span>
-          {tickersList.map((t) => (
-            <button
-              key={t}
-              onClick={() => setActiveResearchTicker(t)}
-              className={`px-2.5 py-1 rounded text-xs font-mono font-semibold transition-colors cursor-pointer border ${
-                activeResearchTicker === t
-                  ? "bg-emerald-950/60 text-emerald-300 border-emerald-700"
-                  : "bg-[var(--bg-surface-elevated)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:text-[var(--text-primary)]"
-              }`}
-            >
-              {t}
-            </button>
-          ))}
+    <div className="space-y-8">
+      {/* Editorial Memo Header */}
+      <div className="border-b border-[var(--hairline)] pb-5">
+        <div className="flex flex-wrap items-center justify-between gap-3 text-[11px] font-mono text-[var(--text-muted)] tracking-wider uppercase mb-2">
+          <div className="flex items-center gap-2">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#365CFF]" />
+            <span>ARCHIVE REF: SEC-{currentSecurity.ticker}-2026</span>
+            <span>·</span>
+            <span>EQUITY RESEARCH MEMORANDUM</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <span className="px-1.5 py-0.5 border border-[var(--hairline)] bg-[var(--bg-surface)] text-[10px]">
+              AUDITED 10-K FILING
+            </span>
+            <DataProvenanceBadge
+              type="VERIFIED_EXTERNAL"
+              source="SEC Form 10-K"
+              timestamp="FY2025"
+            />
+          </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          <Link href={`/app/valuation?ticker=${currentSecurity.ticker}`}>
-            <Button variant="secondary" size="sm" className="text-xs gap-1.5">
-              <Calculator className="h-3.5 w-3.5 text-emerald-400" />
-              <span>DCF Valuation</span>
-            </Button>
-          </Link>
-          <Link href={`/app/committee?ticker=${currentSecurity.ticker}`}>
-            <Button variant="secondary" size="sm" className="text-xs gap-1.5">
-              <Users2 className="h-3.5 w-3.5 text-purple-400" />
-              <span>Committee Review</span>
-            </Button>
-          </Link>
-          <button
-            onClick={() => toggleWatchlist(currentSecurity.ticker)}
-            className={`p-1.5 rounded border border-[var(--border-subtle)] hover:bg-[var(--bg-surface-elevated)] cursor-pointer ${
-              isSavedToWatchlist ? "text-amber-400" : "text-[var(--text-muted)]"
-            }`}
-            title={isSavedToWatchlist ? "Watchlisted" : "Add to watchlist"}
-          >
-            <Star className="h-4 w-4 fill-current" />
-          </button>
-        </div>
-      </div>
-
-      {/* Security Header Banner */}
-      <div className="p-6 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] shadow-xs">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-          <div className="space-y-2">
-            <div className="flex flex-wrap items-center gap-3">
-              <h1 className="text-2xl font-bold font-mono tracking-tight text-[var(--text-primary)]">
-                {currentSecurity.ticker}
-              </h1>
-              <span className="text-base text-[var(--text-secondary)] font-medium">
-                {currentSecurity.name}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-3">
+              <span className="font-mono text-xs px-2 py-0.5 bg-[#365CFF]/10 text-[#365CFF] border border-[#365CFF]/30">
+                {detail.exchange}:{currentSecurity.ticker}
               </span>
-              <Badge variant="outline" size="sm" className="font-mono text-[10px]">
-                {detail.exchange} · {detail.currency}
-              </Badge>
               <Badge
                 variant={
                   currentSecurity.thesisStatus === "HEALTHY"
@@ -129,75 +98,157 @@ function SecurityResearchContent() {
                 Thesis: {currentSecurity.thesisStatus}
               </Badge>
             </div>
-
-            <p className="text-xs text-[var(--text-secondary)] max-w-3xl leading-relaxed">
+            <h1 className="font-serif text-2xl md:text-3xl lg:text-4xl font-normal text-[var(--text-primary)] tracking-tight mt-1.5">
+              {currentSecurity.name}
+            </h1>
+            <p className="text-xs text-[var(--text-secondary)] mt-1.5 max-w-2xl leading-relaxed">
               {detail.description}
             </p>
-
-            <div className="flex flex-wrap items-center gap-4 text-xs text-[var(--text-muted)] pt-1">
-              <span>HQ: {detail.headquarters}</span>
-              <span>·</span>
-              <span>CEO: {detail.ceo}</span>
-              <span>·</span>
-              <DataProvenanceBadge
-                type="VERIFIED_EXTERNAL"
-                source="SEC Form 10-K"
-                timestamp="FY2025"
-              />
-            </div>
           </div>
 
-          {/* Pricing & Key Fundamentals Box */}
-          <div className="p-4 rounded-lg bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] flex flex-col justify-between shrink-0 min-w-[240px]">
-            <div className="flex items-baseline justify-between gap-2">
-              <span className="text-2xl font-bold font-mono text-[var(--text-primary)] num-tabular">
-                {formatCurrency(currentSecurity.price)}
-              </span>
-              <span
-                className={`font-mono text-xs font-semibold px-1.5 py-0.5 rounded ${
-                  currentSecurity.changePercent >= 0
-                    ? "text-emerald-400 bg-emerald-950/40"
-                    : "text-rose-400 bg-rose-950/40"
-                }`}
-              >
-                {formatPercent(currentSecurity.changePercent, true)}
-              </span>
-            </div>
-
-            <div className="grid grid-cols-2 gap-2 mt-3 pt-3 border-t border-[var(--border-subtle)] text-[11px] font-mono num-tabular">
-              <div>
-                <span className="text-[var(--text-muted)] block text-[10px]">Market Cap</span>
-                <span className="text-[var(--text-primary)] font-semibold">${currentSecurity.marketCap}B</span>
-              </div>
-              <div>
-                <span className="text-[var(--text-muted)] block text-[10px]">Trailing P/E</span>
-                <span className="text-[var(--text-primary)] font-semibold">{currentSecurity.peRatio}x</span>
-              </div>
-              <div>
-                <span className="text-[var(--text-muted)] block text-[10px]">ROIC (Moat)</span>
-                <span className="text-emerald-400 font-semibold">{currentSecurity.roic}%</span>
-              </div>
-              <div>
-                <span className="text-[var(--text-muted)] block text-[10px]">FCF Yield</span>
-                <span className="text-sky-400 font-semibold">{currentSecurity.fcfYield}%</span>
-              </div>
-            </div>
+          {/* Quick Action Navigation */}
+          <div className="flex items-center gap-2 shrink-0">
+            <Link href={`/app/valuation?ticker=${currentSecurity.ticker}`}>
+              <Button variant="outline" size="sm" className="text-xs font-mono gap-1.5">
+                <Calculator className="h-3.5 w-3.5 text-[#365CFF]" />
+                <span>DCF Model</span>
+              </Button>
+            </Link>
+            <Link href={`/app/committee?ticker=${currentSecurity.ticker}`}>
+              <Button variant="outline" size="sm" className="text-xs font-mono gap-1.5">
+                <Users2 className="h-3.5 w-3.5 text-[#365CFF]" />
+                <span>Committee Debrief</span>
+              </Button>
+            </Link>
+            <button
+              onClick={() => toggleWatchlist(currentSecurity.ticker)}
+              className={`p-2 border border-[var(--hairline)] bg-[var(--bg-surface)] hover:bg-[var(--bg-surface-elevated)] transition-colors cursor-pointer ${
+                isSavedToWatchlist ? "text-amber-500" : "text-[var(--text-muted)]"
+              }`}
+              title={isSavedToWatchlist ? "Saved to watchlist" : "Add to watchlist"}
+            >
+              <Star className="h-3.5 w-3.5 fill-current" />
+            </button>
           </div>
+        </div>
+      </div>
+
+      {/* Security Selector Bar */}
+      <div className="flex flex-wrap items-center justify-between gap-4 p-3 border border-[var(--hairline)] bg-[var(--bg-surface)] text-xs">
+        <div className="flex items-center gap-2 overflow-x-auto">
+          <span className="font-mono text-[10px] text-[var(--text-muted)] uppercase tracking-wider mr-1">
+            COVERAGE TICKER:
+          </span>
+          {tickersList.map((t) => (
+            <button
+              key={t}
+              onClick={() => setActiveResearchTicker(t)}
+              className={`px-3 py-1 font-mono text-xs font-semibold transition-colors cursor-pointer border ${
+                activeResearchTicker === t
+                  ? "bg-[#111210] dark:bg-[#F4F1E9] text-[#F4F1E9] dark:text-[#111210] border-transparent"
+                  : "bg-transparent text-[var(--text-secondary)] border-[var(--hairline)] hover:border-[#365CFF] hover:text-[#365CFF]"
+              }`}
+            >
+              {t}
+            </button>
+          ))}
+        </div>
+
+        <div className="flex items-center gap-4 text-[11px] font-mono text-[var(--text-muted)]">
+          <span>HQ: {detail.headquarters}</span>
+          <span>·</span>
+          <span>CEO: {detail.ceo}</span>
+        </div>
+      </div>
+
+      {/* Pricing & Key Fundamentals Schedule */}
+      <div className="border border-[var(--hairline)] bg-[var(--bg-surface)] grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 divide-y sm:divide-y-0 sm:divide-x divide-[var(--hairline)] num-tabular">
+        <div className="p-4 space-y-1">
+          <div className="text-[10px] font-mono text-[var(--text-muted)] uppercase tracking-wider">
+            SPOT QUOTE
+          </div>
+          <div className="text-xl font-bold font-mono text-[var(--text-primary)]">
+            {formatCurrency(currentSecurity.price)}
+          </div>
+          <div
+            className={`font-mono text-xs font-semibold ${
+              currentSecurity.changePercent >= 0
+                ? "text-emerald-600 dark:text-emerald-400"
+                : "text-rose-600 dark:text-rose-400"
+            }`}
+          >
+            {formatPercent(currentSecurity.changePercent, true)}
+          </div>
+        </div>
+
+        <div className="p-4 space-y-1">
+          <div className="text-[10px] font-mono text-[var(--text-muted)] uppercase tracking-wider">
+            MARKET CAP
+          </div>
+          <div className="text-xl font-bold font-mono text-[var(--text-primary)]">
+            ${currentSecurity.marketCap}B
+          </div>
+          <div className="text-[11px] font-mono text-[var(--text-muted)]">Large-Cap Tech</div>
+        </div>
+
+        <div className="p-4 space-y-1">
+          <div className="text-[10px] font-mono text-[var(--text-muted)] uppercase tracking-wider">
+            TRAILING P/E
+          </div>
+          <div className="text-xl font-bold font-mono text-[var(--text-primary)]">
+            {currentSecurity.peRatio}x
+          </div>
+          <div className="text-[11px] font-mono text-[var(--text-muted)]">Forward: 28.4x</div>
+        </div>
+
+        <div className="p-4 space-y-1">
+          <div className="text-[10px] font-mono text-[var(--text-muted)] uppercase tracking-wider">
+            ROIC (MOAT)
+          </div>
+          <div className="text-xl font-bold font-mono text-emerald-600 dark:text-emerald-400">
+            {currentSecurity.roic}%
+          </div>
+          <div className="text-[11px] font-mono text-[var(--text-muted)]">WACC: 9.5%</div>
+        </div>
+
+        <div className="p-4 space-y-1">
+          <div className="text-[10px] font-mono text-[var(--text-muted)] uppercase tracking-wider">
+            FCF YIELD
+          </div>
+          <div className="text-xl font-bold font-mono text-[#365CFF]">
+            {currentSecurity.fcfYield}%
+          </div>
+          <div className="text-[11px] font-mono text-[var(--text-muted)]">FCF/EV: 3.1%</div>
+        </div>
+
+        <div className="p-4 space-y-1">
+          <div className="text-[10px] font-mono text-[var(--text-muted)] uppercase tracking-wider">
+            REV GROWTH
+          </div>
+          <div className="text-xl font-bold font-mono text-emerald-600 dark:text-emerald-400">
+            +{currentSecurity.revenueGrowth}%
+          </div>
+          <div className="text-[11px] font-mono text-[var(--text-muted)]">YoY Trailing</div>
         </div>
       </div>
 
       {/* Historical Performance Chart */}
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between pb-2">
+        <CardHeader className="flex flex-row items-center justify-between border-b border-[var(--hairline)] pb-3">
           <div>
-            <CardTitle>{currentSecurity.ticker} Relative Price Trajectory</CardTitle>
-            <p className="text-xs text-[var(--text-muted)] mt-0.5">
-              Trailing performance indexed against S&P 500 benchmark
+            <div className="text-[10px] font-mono uppercase tracking-wider text-[var(--text-muted)]">
+              FIGURE 2.0 · TRAILING TRAJECTORY
+            </div>
+            <CardTitle className="font-serif text-lg font-normal mt-0.5">
+              {currentSecurity.ticker} Relative Price Trajectory
+            </CardTitle>
+            <p className="text-xs text-[var(--text-secondary)] mt-0.5">
+              Historical adjusted close indexed against S&P 500 benchmark
             </p>
           </div>
           <Badge variant="provenance">Adjusted Close · Splits Included</Badge>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-4">
           <AreaLineChart
             data={[
               { date: "2024-01", value: 54.0, benchmark: 100 },
@@ -213,26 +264,26 @@ function SecurityResearchContent() {
             ]}
             primaryLabel={`${currentSecurity.ticker} Price`}
             benchmarkLabel="S&P 500 (SPY)"
-            height={200}
+            height={220}
             isCurrency={true}
           />
         </CardContent>
       </Card>
 
-      {/* Navigation Tabs */}
-      <div className="flex items-center gap-1 border-b border-[var(--border-subtle)]">
+      {/* Swiss Numbered Navigation Tabs */}
+      <div className="flex items-center gap-2 border-b border-[var(--hairline)] overflow-x-auto text-xs font-mono">
         {[
-          { id: "overview", label: "Scenarios & Thesis" },
-          { id: "financials", label: "Financials (5-Year)" },
-          { id: "forensic", label: "Forensic Accounting Audit" },
-          { id: "peers", label: "Peer Multiples" },
+          { id: "overview", label: "01. SCENARIOS & THESIS" },
+          { id: "financials", label: "02. FINANCIAL STATEMENTS (5-YR)" },
+          { id: "forensic", label: "03. FORENSIC ACCOUNTING AUDIT" },
+          { id: "peers", label: "04. PEER MULTIPLES" },
         ].map((t) => (
           <button
             key={t.id}
             onClick={() => setActiveTab(t.id as "overview" | "financials" | "forensic" | "peers")}
-            className={`px-4 py-2.5 text-xs font-semibold border-b-2 transition-colors cursor-pointer ${
+            className={`px-4 py-3 border-b-2 transition-colors cursor-pointer whitespace-nowrap ${
               activeTab === t.id
-                ? "border-emerald-500 text-emerald-400 bg-[var(--bg-surface-elevated)]/30"
+                ? "border-[#365CFF] text-[#365CFF] font-semibold bg-[var(--bg-surface)]"
                 : "border-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
             }`}
           >
@@ -243,64 +294,64 @@ function SecurityResearchContent() {
 
       {/* Tab 1: Scenarios & Thesis */}
       {activeTab === "overview" && (
-        <div className="space-y-6">
-          {/* Bull, Base, Bear Scenarios */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="space-y-8">
+          {/* Bull, Base, Bear Scenarios Broadsheet */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Bull Case */}
-            <div className="p-4 rounded-lg bg-[var(--bg-surface)] border border-emerald-900/60 space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-emerald-400 uppercase tracking-wide">
+            <div className="border border-[var(--hairline)] bg-[var(--bg-surface)] p-5 space-y-4">
+              <div className="flex items-center justify-between pb-3 border-b border-[var(--hairline)]">
+                <span className="text-xs font-mono font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wide">
                   Bull Case ({detail.bullCase.probability}% Prob)
                 </span>
-                <span className="font-mono text-base font-bold text-emerald-400 num-tabular">
+                <span className="font-mono text-lg font-bold text-emerald-600 dark:text-emerald-400 num-tabular">
                   ${detail.bullCase.targetPrice.toFixed(2)}
                 </span>
               </div>
-              <ul className="space-y-2 text-xs text-[var(--text-secondary)]">
+              <ul className="space-y-2.5 text-xs text-[var(--text-secondary)]">
                 {detail.bullCase.catalysts.map((c, i) => (
-                  <li key={i} className="flex items-start gap-2">
-                    <span className="text-emerald-400 shrink-0">▪</span>
-                    <span>{c}</span>
+                  <li key={i} className="flex items-start gap-2.5">
+                    <span className="text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5">■</span>
+                    <span className="leading-relaxed">{c}</span>
                   </li>
                 ))}
               </ul>
             </div>
 
             {/* Base Case */}
-            <div className="p-4 rounded-lg bg-[var(--bg-surface)] border border-[var(--border-subtle)] space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-[var(--text-primary)] uppercase tracking-wide">
+            <div className="border border-[var(--hairline)] bg-[var(--bg-surface)] p-5 space-y-4">
+              <div className="flex items-center justify-between pb-3 border-b border-[var(--hairline)]">
+                <span className="text-xs font-mono font-bold text-[var(--text-primary)] uppercase tracking-wide">
                   Base Case ({detail.baseCase.probability}% Prob)
                 </span>
-                <span className="font-mono text-base font-bold text-[var(--text-primary)] num-tabular">
+                <span className="font-mono text-lg font-bold text-[var(--text-primary)] num-tabular">
                   ${detail.baseCase.targetPrice.toFixed(2)}
                 </span>
               </div>
-              <ul className="space-y-2 text-xs text-[var(--text-secondary)]">
+              <ul className="space-y-2.5 text-xs text-[var(--text-secondary)]">
                 {detail.baseCase.catalysts.map((c, i) => (
-                  <li key={i} className="flex items-start gap-2">
-                    <span className="text-[var(--text-muted)] shrink-0">▪</span>
-                    <span>{c}</span>
+                  <li key={i} className="flex items-start gap-2.5">
+                    <span className="text-[var(--text-muted)] shrink-0 mt-0.5">■</span>
+                    <span className="leading-relaxed">{c}</span>
                   </li>
                 ))}
               </ul>
             </div>
 
             {/* Bear Case */}
-            <div className="p-4 rounded-lg bg-[var(--bg-surface)] border border-rose-900/60 space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-rose-400 uppercase tracking-wide">
+            <div className="border border-[var(--hairline)] bg-[var(--bg-surface)] p-5 space-y-4">
+              <div className="flex items-center justify-between pb-3 border-b border-[var(--hairline)]">
+                <span className="text-xs font-mono font-bold text-rose-600 dark:text-rose-400 uppercase tracking-wide">
                   Bear Case ({detail.bearCase.probability}% Prob)
                 </span>
-                <span className="font-mono text-base font-bold text-rose-400 num-tabular">
+                <span className="font-mono text-lg font-bold text-rose-600 dark:text-rose-400 num-tabular">
                   ${detail.bearCase.targetPrice.toFixed(2)}
                 </span>
               </div>
-              <ul className="space-y-2 text-xs text-[var(--text-secondary)]">
+              <ul className="space-y-2.5 text-xs text-[var(--text-secondary)]">
                 {detail.bearCase.catalysts.map((c, i) => (
-                  <li key={i} className="flex items-start gap-2">
-                    <span className="text-rose-400 shrink-0">▪</span>
-                    <span>{c}</span>
+                  <li key={i} className="flex items-start gap-2.5">
+                    <span className="text-rose-600 dark:text-rose-400 shrink-0 mt-0.5">■</span>
+                    <span className="leading-relaxed">{c}</span>
                   </li>
                 ))}
               </ul>
@@ -309,26 +360,33 @@ function SecurityResearchContent() {
 
           {/* Research Notes & Thesis Editor */}
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle>Analyst Research Thesis & Notes</CardTitle>
-              <div className="flex items-center gap-2">
+            <CardHeader className="flex flex-row items-center justify-between border-b border-[var(--hairline)] pb-3">
+              <div>
+                <div className="text-[10px] font-mono uppercase tracking-wider text-[var(--text-muted)]">
+                  ANALYST LOG
+                </div>
+                <CardTitle className="font-serif text-lg font-normal">
+                  Investigative Notes & Conviction
+                </CardTitle>
+              </div>
+              <div className="flex items-center gap-3">
                 {notesSaved && (
-                  <span className="text-xs text-emerald-400 flex items-center gap-1">
+                  <span className="text-xs font-mono text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
                     <CheckCircle2 className="h-3.5 w-3.5" /> Saved
                   </span>
                 )}
-                <Button variant="primary" size="sm" onClick={handleSaveNotes} className="text-xs">
+                <Button variant="primary" size="sm" onClick={handleSaveNotes} className="text-xs font-mono">
                   Save Notes
                 </Button>
               </div>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-4">
               <textarea
                 value={researchNotes}
                 onChange={(e) => setResearchNotes(e.target.value)}
                 rows={3}
                 placeholder="Record qualitative conviction, catalyst dates, and thesis assumptions..."
-                className="w-full p-3 rounded-md bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-xs text-[var(--text-primary)] focus:outline-none focus:border-emerald-500 leading-relaxed font-sans"
+                className="w-full p-4 border border-[var(--hairline)] bg-[var(--bg-surface-elevated)]/30 text-xs text-[var(--text-primary)] focus:outline-none focus:border-[#365CFF] leading-relaxed font-sans"
               />
             </CardContent>
           </Card>
@@ -338,11 +396,16 @@ function SecurityResearchContent() {
       {/* Tab 2: Financial Statements */}
       {activeTab === "financials" && (
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
+          <CardHeader className="flex flex-row items-center justify-between border-b border-[var(--hairline)] pb-3">
             <div>
-              <CardTitle>5-Year Financial Statement History</CardTitle>
-              <p className="text-xs text-[var(--text-muted)] mt-0.5">
-                Amounts in Billions USD (USD) · SEC Form 10-K
+              <div className="text-[10px] font-mono uppercase tracking-wider text-[var(--text-muted)]">
+                AUDITED SCHEDULE · GAAP STATEMENTS
+              </div>
+              <CardTitle className="font-serif text-lg font-normal mt-0.5">
+                5-Year Financial Statement History
+              </CardTitle>
+              <p className="text-xs text-[var(--text-secondary)] mt-0.5">
+                Amounts in Billions USD ($B) · SEC Form 10-K Filings
               </p>
             </div>
             <DataProvenanceBadge type="VERIFIED_EXTERNAL" source="SEC EDGAR" />
@@ -351,68 +414,68 @@ function SecurityResearchContent() {
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs border-collapse">
                 <thead>
-                  <tr className="border-b border-[var(--border-subtle)] bg-[var(--bg-surface-elevated)] text-[11px] text-[var(--text-muted)] font-medium">
-                    <th className="p-3 pl-4">Metric ($B)</th>
+                  <tr className="border-b border-[var(--hairline)] bg-[var(--bg-surface-elevated)]/40 text-[10px] font-mono text-[var(--text-muted)] uppercase tracking-wider">
+                    <th className="p-3.5 pl-5">Financial Metric ($B)</th>
                     {detail.financialHistory.map((f) => (
-                      <th key={f.year} className="p-3 text-right font-mono">
+                      <th key={f.year} className="p-3.5 text-right font-mono">
                         {f.year}
                       </th>
                     ))}
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[var(--border-subtle)]/40 num-tabular">
+                <tbody className="divide-y divide-[var(--hairline)] num-tabular">
                   <tr>
-                    <td className="p-3 pl-4 font-semibold text-[var(--text-primary)]">Total Revenue</td>
+                    <td className="p-3.5 pl-5 font-semibold text-[var(--text-primary)]">Total Revenue</td>
                     {detail.financialHistory.map((f) => (
-                      <td key={f.year} className="p-3 text-right font-mono font-semibold text-emerald-400">
+                      <td key={f.year} className="p-3.5 text-right font-mono font-semibold text-emerald-600 dark:text-emerald-400">
                         ${f.revenue.toFixed(2)}
                       </td>
                     ))}
                   </tr>
                   <tr>
-                    <td className="p-3 pl-4 text-[var(--text-secondary)]">Gross Profit</td>
+                    <td className="p-3.5 pl-5 text-[var(--text-secondary)]">Gross Profit</td>
                     {detail.financialHistory.map((f) => (
-                      <td key={f.year} className="p-3 text-right font-mono text-[var(--text-primary)]">
+                      <td key={f.year} className="p-3.5 text-right font-mono text-[var(--text-primary)]">
                         ${f.grossProfit.toFixed(2)}
                       </td>
                     ))}
                   </tr>
                   <tr>
-                    <td className="p-3 pl-4 text-[var(--text-secondary)]">Operating Income</td>
+                    <td className="p-3.5 pl-5 text-[var(--text-secondary)]">Operating Income</td>
                     {detail.financialHistory.map((f) => (
-                      <td key={f.year} className="p-3 text-right font-mono text-[var(--text-primary)]">
+                      <td key={f.year} className="p-3.5 text-right font-mono text-[var(--text-primary)]">
                         ${f.operatingIncome.toFixed(2)}
                       </td>
                     ))}
                   </tr>
                   <tr>
-                    <td className="p-3 pl-4 text-[var(--text-secondary)]">Operating Margin %</td>
+                    <td className="p-3.5 pl-5 text-[var(--text-secondary)]">Operating Margin %</td>
                     {detail.financialHistory.map((f) => (
-                      <td key={f.year} className="p-3 text-right font-mono text-emerald-400">
+                      <td key={f.year} className="p-3.5 text-right font-mono text-emerald-600 dark:text-emerald-400">
                         {f.operatingMargin.toFixed(1)}%
                       </td>
                     ))}
                   </tr>
                   <tr>
-                    <td className="p-3 pl-4 font-semibold text-[var(--text-primary)]">Free Cash Flow</td>
+                    <td className="p-3.5 pl-5 font-semibold text-[var(--text-primary)]">Free Cash Flow</td>
                     {detail.financialHistory.map((f) => (
-                      <td key={f.year} className="p-3 text-right font-mono font-semibold text-sky-400">
+                      <td key={f.year} className="p-3.5 text-right font-mono font-semibold text-[#365CFF]">
                         ${f.freeCashFlow.toFixed(2)}
                       </td>
                     ))}
                   </tr>
                   <tr>
-                    <td className="p-3 pl-4 text-[var(--text-secondary)]">Cash & Equivalents</td>
+                    <td className="p-3.5 pl-5 text-[var(--text-secondary)]">Cash & Short-Term Equiv</td>
                     {detail.financialHistory.map((f) => (
-                      <td key={f.year} className="p-3 text-right font-mono text-[var(--text-primary)]">
+                      <td key={f.year} className="p-3.5 text-right font-mono text-[var(--text-primary)]">
                         ${f.cashAndEquivalents.toFixed(2)}
                       </td>
                     ))}
                   </tr>
                   <tr>
-                    <td className="p-3 pl-4 text-[var(--text-secondary)]">Total Debt</td>
+                    <td className="p-3.5 pl-5 text-[var(--text-secondary)]">Total Debt (Short & Long)</td>
                     {detail.financialHistory.map((f) => (
-                      <td key={f.year} className="p-3 text-right font-mono text-[var(--text-muted)]">
+                      <td key={f.year} className="p-3.5 text-right font-mono text-[var(--text-muted)]">
                         ${f.totalDebt.toFixed(2)}
                       </td>
                     ))}
@@ -426,14 +489,14 @@ function SecurityResearchContent() {
 
       {/* Tab 3: Forensic Accounting Audit */}
       {activeTab === "forensic" && (
-        <div className="space-y-4">
-          <div className="p-4 rounded-lg bg-[var(--bg-surface)] border border-[var(--border-subtle)] flex items-center justify-between text-xs">
+        <div className="space-y-6">
+          <div className="p-4 border border-[var(--hairline)] bg-[var(--bg-surface)] flex items-center justify-between text-xs">
             <div>
-              <span className="font-semibold text-[var(--text-primary)]">
+              <span className="font-mono font-bold text-[var(--text-primary)] uppercase tracking-wide">
                 Algorithmic Forensic Accounting Screening
               </span>
-              <p className="text-[var(--text-muted)] text-[11px] mt-0.5">
-                Checks for aggressive revenue recognition, Sloan accrual distortion, and DSO divergence.
+              <p className="text-[var(--text-secondary)] text-xs mt-0.5">
+                Automated tests for aggressive revenue recognition, Sloan accrual distortion, and DSO divergence.
               </p>
             </div>
             <DataProvenanceBadge type="CALCULATED_METRIC" source="Forensic Engine" />
@@ -443,10 +506,10 @@ function SecurityResearchContent() {
             {detail.forensicChecks.map((fc, i) => (
               <div
                 key={i}
-                className="p-4 rounded-lg bg-[var(--bg-surface)] border border-[var(--border-subtle)] space-y-2 text-xs"
+                className="p-5 border border-[var(--hairline)] bg-[var(--bg-surface)] space-y-2.5 text-xs"
               >
                 <div className="flex items-center justify-between">
-                  <span className="font-bold text-[var(--text-primary)]">{fc.metric}</span>
+                  <span className="font-mono font-bold text-[var(--text-primary)]">{fc.metric}</span>
                   <div className="flex items-center gap-2 font-mono">
                     <span className="text-[var(--text-primary)] font-semibold">{fc.score}</span>
                     <Badge
@@ -458,7 +521,7 @@ function SecurityResearchContent() {
                   </div>
                 </div>
                 <p className="text-[var(--text-secondary)] leading-relaxed">{fc.detail}</p>
-                <div className="text-[10px] text-[var(--text-muted)] pt-1 border-t border-[var(--border-subtle)]/50">
+                <div className="text-[10px] font-mono text-[var(--text-muted)] pt-2 border-t border-[var(--hairline)]">
                   Source: {fc.source}
                 </div>
               </div>
@@ -470,31 +533,36 @@ function SecurityResearchContent() {
       {/* Tab 4: Peer Multiples */}
       {activeTab === "peers" && (
         <Card>
-          <CardHeader>
-            <CardTitle>Industry Peer Valuation Multiples</CardTitle>
+          <CardHeader className="border-b border-[var(--hairline)] pb-3">
+            <div className="text-[10px] font-mono uppercase tracking-wider text-[var(--text-muted)]">
+              SCHEDULE 4.0 · RELATIVE VALUATION
+            </div>
+            <CardTitle className="font-serif text-lg font-normal mt-0.5">
+              Industry Peer Valuation Multiples
+            </CardTitle>
           </CardHeader>
           <CardContent className="p-0">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs border-collapse">
                 <thead>
-                  <tr className="border-b border-[var(--border-subtle)] bg-[var(--bg-surface-elevated)] text-[11px] text-[var(--text-muted)] font-medium">
-                    <th className="p-3 pl-4">Ticker</th>
-                    <th className="p-3">Company</th>
-                    <th className="p-3 text-right">P/E</th>
-                    <th className="p-3 text-right">EV/EBITDA</th>
-                    <th className="p-3 text-right">YoY Rev Growth</th>
-                    <th className="p-3 text-right pr-4">FCF Yield</th>
+                  <tr className="border-b border-[var(--hairline)] bg-[var(--bg-surface-elevated)]/40 text-[10px] font-mono text-[var(--text-muted)] uppercase tracking-wider">
+                    <th className="p-3.5 pl-5">Ticker</th>
+                    <th className="p-3.5">Company</th>
+                    <th className="p-3.5 text-right">P/E</th>
+                    <th className="p-3.5 text-right">EV/EBITDA</th>
+                    <th className="p-3.5 text-right">YoY Rev Growth</th>
+                    <th className="p-3.5 text-right pr-5">FCF Yield</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[var(--border-subtle)]/40 num-tabular">
+                <tbody className="divide-y divide-[var(--hairline)] num-tabular">
                   {detail.comparables.map((c) => (
-                    <tr key={c.ticker} className="hover:bg-[var(--bg-surface-elevated)]/30">
-                      <td className="p-3 pl-4 font-mono font-bold text-emerald-400">{c.ticker}</td>
-                      <td className="p-3 text-[var(--text-primary)]">{c.name}</td>
-                      <td className="p-3 text-right font-mono text-[var(--text-primary)]">{c.pe}x</td>
-                      <td className="p-3 text-right font-mono text-[var(--text-primary)]">{c.evEbitda}x</td>
-                      <td className="p-3 text-right font-mono text-emerald-400">+{c.revGrowth}%</td>
-                      <td className="p-3 text-right pr-4 font-mono text-sky-400">{c.fcfYield}%</td>
+                    <tr key={c.ticker} className="hover:bg-[var(--bg-surface-elevated)]/40">
+                      <td className="p-3.5 pl-5 font-mono font-bold text-[#365CFF]">{c.ticker}</td>
+                      <td className="p-3.5 text-[var(--text-primary)]">{c.name}</td>
+                      <td className="p-3.5 text-right font-mono text-[var(--text-primary)]">{c.pe}x</td>
+                      <td className="p-3.5 text-right font-mono text-[var(--text-primary)]">{c.evEbitda}x</td>
+                      <td className="p-3.5 text-right font-mono text-emerald-600 dark:text-emerald-400">+{c.revGrowth}%</td>
+                      <td className="p-3.5 text-right pr-5 font-mono text-[#365CFF]">{c.fcfYield}%</td>
                     </tr>
                   ))}
                 </tbody>

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { X, ShieldAlert, ArrowRight } from "lucide-react";
+import { X, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { useWorkspace } from "@/context/WorkspaceContext";
 
@@ -13,53 +13,48 @@ export function DemoDataBanner() {
 
   if (collapsed) {
     return (
-      <div className="bg-amber-950/80 border-b border-amber-800/60 px-4 py-1.5 flex items-center justify-between text-xs text-amber-300">
+      <div className="bg-[#FAF8F3] dark:bg-[#181916] border-b border-[var(--border-subtle)] px-4 py-1 flex items-center justify-between text-xs text-[var(--text-secondary)] font-mono">
         <div className="flex items-center gap-2">
-          <span className="inline-block h-2 w-2 rounded-full bg-amber-400 animate-pulse" />
-          <span className="font-semibold tracking-wider font-mono text-[11px] uppercase">
-            Demo Environment Active
+          <span className="inline-block h-1.5 w-1.5 rounded-full bg-[#D8F36A] border border-black/40 animate-pulse" />
+          <span className="font-bold text-[10px] uppercase tracking-wider text-[var(--text-primary)]">
+            SANDBOX SIMULATION ACTIVE
           </span>
-          <span className="text-amber-400/80 hidden sm:inline">
-            — Simulated data & SEC historical filings in sandbox mode
+          <span className="text-[10px] text-[var(--text-muted)] hidden sm:inline">
+            — SEC EDGAR Historical Archive & Mathematical DCF Models
           </span>
         </div>
         <button
           onClick={() => setCollapsed(false)}
-          className="text-amber-300 underline hover:text-amber-200 cursor-pointer text-xs"
+          className="text-[10px] text-[#365CFF] underline hover:text-[#2649E6] cursor-pointer"
         >
-          Expand Details
+          Expand Notice
         </button>
       </div>
     );
   }
 
   return (
-    <aside aria-label="Environment Notice" className="bg-amber-950/90 border-b border-amber-700/70 px-4 py-2.5 text-xs text-amber-200 shadow-inner">
-      <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5">
-        <div className="flex items-start sm:items-center gap-2.5">
-          <div className="p-1 rounded bg-amber-900/60 text-amber-300 shrink-0 mt-0.5 sm:mt-0">
-            <ShieldAlert className="h-4 w-4" />
-          </div>
-          <div>
-            <span className="font-mono font-bold tracking-wider text-amber-300 mr-2 uppercase text-[11px] px-1.5 py-0.5 rounded bg-amber-900/80 border border-amber-700/80">
-              DEMO DATA ENVIRONMENT
-            </span>
-            <span className="text-amber-200">
-              External market feeds and broker connections are in simulated demonstration mode. Numbers are computed from point-in-time SEC EDGAR filings and internal mathematical models.
-            </span>
-          </div>
+    <aside aria-label="Environment Notice" className="bg-[#EDEAE1] dark:bg-[#1C1E1A] border-b border-[var(--border-subtle)] px-4 py-2 text-xs">
+      <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 font-mono text-[11px]">
+        <div className="flex items-center gap-2.5">
+          <span className="px-1.5 py-0.5 rounded-xs bg-[#D8F36A] text-[#121311] font-bold text-[9px] uppercase tracking-wider border border-[#C9E55B]">
+            DISPATCH // SANDBOX DEMO
+          </span>
+          <span className="text-[var(--text-primary)] font-sans text-xs">
+            Market feeds & execution sandboxes are running in test mode. Figures are derived strictly from SEC EDGAR filings and internal mathematical engines.
+          </span>
         </div>
-        <div className="flex items-center gap-3 shrink-0 self-end sm:self-auto">
+        <div className="flex items-center gap-4 shrink-0 self-end sm:self-auto">
           <Link
             href="/app/settings"
-            className="inline-flex items-center gap-1 font-medium text-amber-300 hover:text-amber-100 hover:underline"
+            className="inline-flex items-center gap-1 font-bold text-[#365CFF] hover:underline"
           >
-            <span>Connect Live Feeds</span>
+            <span>Configure Feeds</span>
             <ArrowRight className="h-3 w-3" />
           </Link>
           <button
             onClick={() => setCollapsed(true)}
-            className="p-1 text-amber-400 hover:text-amber-200 rounded hover:bg-amber-900/40 cursor-pointer"
+            className="p-1 text-[var(--text-muted)] hover:text-[var(--text-primary)] cursor-pointer"
             title="Minimize notice"
             aria-label="Minimize demonstration notice"
           >
